@@ -4,7 +4,7 @@ Bitig is a structured, type-safe TypeScript command-line tool designed for autho
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 To initialize a template book structure in your current working directory, run:
 
@@ -20,7 +20,7 @@ This creates:
 
 ---
 
-## 🛠 Command Reference
+## Command Reference
 
 ### 1. Compiling the Book
 
@@ -102,7 +102,7 @@ Outputs this writing workflow guide directly to the terminal for easy reading by
 
 ---
 
-## 🤖 AI Agent Workflow Guide
+## AI Agent Workflow Guide
 
 When writing or editing using Bitig, follow this recommended workflow loop:
 
