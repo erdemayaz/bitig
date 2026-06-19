@@ -67,6 +67,9 @@ switch (command) {
   case 'search':
     handleSearch(cliArgs);
     break;
+  case 'guide':
+    handleGuide();
+    break;
   default:
     console.error(`Error: Unknown command "${command}"`);
     showHelp();
@@ -171,6 +174,7 @@ Commands:
   check                          Runs static diagnostics for broken links, syntax, and citation usage.
   context <sec>.<chap>           Generates a focused RAG/prompt package containing outlines and synopsis.
   search <query>                 Searches the entire book for keywords or phrases.
+  guide                          Displays the comprehensive English guide on book writing workflow.
   help                           Displays this help menu.
 
 Global Options:
@@ -607,4 +611,71 @@ function handleSearch(cliArgs: CliArgs): void {
     console.error('❌ Search failed:', err.message);
     process.exit(1);
   }
+}
+
+/**
+ * Displays the comprehensive English writing workflow guide.
+ * Reads README.md if available, otherwise prints the built-in guide.
+ */
+function handleGuide(): void {
+  const readmePath = path.join(__dirname, '..', 'README.md');
+  if (fs.existsSync(readmePath)) {
+    try {
+      const content = fs.readFileSync(readmePath, 'utf8');
+      console.log(content);
+      return;
+    } catch (e) {
+      // Fallback if read failed
+    }
+  }
+
+  // Built-in English Guide fallback
+  console.log(`
+# BITIG - AI-FRIENDLY BOOK WRITING WORKFLOW GUIDE
+
+Welcome to Bitig! This guide details the workflow steps to write, refine, and compile a structured book with AI assistance.
+
+## WORKFLOW STEPS
+
+1. INITIALIZATION
+   Create a new book directory, navigate into it, and run:
+     bitig init
+   This scaffolds the default structure:
+     - book.json: Main book metadata, outline, citations, and themes.
+     - assets/: Directory containing section folders and markdown chapters.
+
+2. STRUCTURE MANAGEMENT
+   Manage your book hierarchy using structural CLI commands:
+     - bitig add:section <secNum> --title "<title>"
+     - bitig add:chapter <secNum>.<chapNum> --title "<title>"
+     - bitig move:chapter <from> <to>
+     - bitig delete:chapter <secNum>.<chapNum>
+
+3. AI CONTEXT PACKAGING (For AI Writers)
+   When using an LLM / AI Agent to write or continue a chapter, do NOT pass the entire book.
+   Instead, package a focused context prompt:
+     bitig context <secNum>.<chapNum>
+   This generates a prompt pack containing:
+     - Book metadata & overall outlines.
+     - Detailed synopses of all chapters.
+     - Style/citation guidelines.
+     - The complete text of the preceding chapter to maintain narrative flow.
+     - Target chapter's current text (if any) to expand or edit.
+
+4. DIAGNOSTICS & QUALITY CHECKS
+   Run static diagnostics to check for unclosed code blocks, broken internal links, and unused citation terms:
+     bitig check
+
+5. COMPILING & PUBLISHING
+   Generate your final distribution formats inside the 'dist/' folder:
+     bitig build
+   This compiles:
+     - <bookName>.md: Assembled manuscript with shifted headers and applied citation superscripts.
+     - <bookName>.html: Print-styled HTML layout.
+     - <bookName>.pdf: Print-ready A4 PDF with covers and page-number aligned TOC (requires Puppeteer).
+     - book-metadata.json: Comprehensive structural metadata and chapter summaries for AI search/indexing.
+
+For detailed command options, run:
+  bitig --help
+`);
 }
