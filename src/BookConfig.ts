@@ -30,7 +30,7 @@ export class BookConfig {
     this.customThemePath = configData.customThemePath || '';
     this.pdf = configData.pdf !== false; // defaults to true
     this.citations = configData.citations || [];
-    
+
     this.rawConfig = {
       title: this.title,
       subtitle: this.subtitle,
@@ -50,7 +50,7 @@ export class BookConfig {
 
   /**
    * Loads a configuration from a JSON file.
-   * @param configPath 
+   * @param configPath
    * @returns BookConfig
    */
   public static loadFromFile(configPath: string): BookConfig {
@@ -109,17 +109,19 @@ export class BookConfig {
    */
   public getCitationRules(): CitationCompiledRule[] {
     if (!Array.isArray(this.citations)) return [];
-    
-    return this.citations.map((rule): CitationCompiledRule | null => {
-      const termPattern = rule.term;
-      if (typeof termPattern === 'string') {
-        const escaped = termPattern.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-        return {
-          term: new RegExp(escaped, 'g'),
-          replacement: rule.replacement
-        };
-      }
-      return null;
-    }).filter((rule): rule is CitationCompiledRule => rule !== null);
+
+    return this.citations
+      .map((rule): CitationCompiledRule | null => {
+        const termPattern = rule.term;
+        if (typeof termPattern === 'string') {
+          const escaped = termPattern.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+          return {
+            term: new RegExp(escaped, 'g'),
+            replacement: rule.replacement
+          };
+        }
+        return null;
+      })
+      .filter((rule): rule is CitationCompiledRule => rule !== null);
   }
 }

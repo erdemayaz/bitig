@@ -21,18 +21,18 @@ export class Chapter {
 
   /**
    * Parses section and chapter numbers from file paths and names.
-   * @param specialFiles 
+   * @param specialFiles
    */
   private _parseNumbers(specialFiles: SpecialFiles): void {
     const filename = path.basename(this.filePath);
-    
+
     // Check if it matches epilogue or bibliography
     if (specialFiles.epilogue && filename === path.basename(specialFiles.epilogue)) {
       this.sectionNum = 998;
       this.chapterNum = 1;
       return;
     }
-    
+
     if (specialFiles.bibliography && filename === path.basename(specialFiles.bibliography)) {
       this.sectionNum = 999;
       this.chapterNum = 1;

@@ -31,16 +31,16 @@ export class StyleManager {
 
   /**
    * Loads custom CSS from a file path.
-   * @param cssPath 
+   * @param cssPath
    */
   public useCustomTheme(cssPath: string): void {
     if (!cssPath) return;
-    
+
     const absolutePath = path.resolve(cssPath);
     if (!fs.existsSync(absolutePath)) {
       throw new Error(`Custom CSS file not found at: ${cssPath}`);
     }
-    
+
     this.customCSSPath = absolutePath;
     this.customCSS = fs.readFileSync(absolutePath, 'utf8').trim();
   }
@@ -75,7 +75,7 @@ export class StyleManager {
 
   /**
    * Generates HTML for the cover page.
-   * @param config 
+   * @param config
    * @returns string
    */
   public generateCoverPage(config: BookConfig): string {

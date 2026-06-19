@@ -35,7 +35,7 @@ describe('ContextPackager', () => {
     section1.addChapter(chapter1);
     section1.addChapter(chapter2);
     compiler.sections = [section1];
-    
+
     compiler.metadataGenerator = new AgentMetadataGenerator(config, compiler.sections);
 
     const packager = new ContextPackager(compiler);

@@ -77,12 +77,18 @@ describe('Bitig CLI Integration Tests', () => {
     expect(checkOutput).toContain('Diagnostics finished: 0 errors, 1 warnings found.');
 
     // Test search command
-    const searchOutput = execSync(`node ${cliPath} search "quantum"`, { cwd: tempDir, encoding: 'utf8' });
+    const searchOutput = execSync(`node ${cliPath} search "quantum"`, {
+      cwd: tempDir,
+      encoding: 'utf8'
+    });
     expect(searchOutput).toContain('Searching for "quantum"');
     expect(searchOutput).toContain('Found 1 match');
 
     // Test context command
-    const contextOutput = execSync(`node ${cliPath} context 1.1`, { cwd: tempDir, encoding: 'utf8' });
+    const contextOutput = execSync(`node ${cliPath} context 1.1`, {
+      cwd: tempDir,
+      encoding: 'utf8'
+    });
     expect(contextOutput).toContain('BOOK WRITING CONTEXT PACK');
     expect(contextOutput).toContain('Section 1, Chapter 1');
     expect(contextOutput).toContain('Foundations and the World');

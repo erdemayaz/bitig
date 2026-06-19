@@ -54,7 +54,9 @@ describe('TextProcessor', () => {
 
     it('should correctly map Turkish characters', () => {
       expect(TextProcessor.slugify('Çalışma Odası Şenliği')).toBe('calisma-odasi-senligi');
-      expect(TextProcessor.slugify('Ilık Göller Öksüz Kalmasın')).toBe('ilik-goller-oksuz-kalmasin');
+      expect(TextProcessor.slugify('Ilık Göller Öksüz Kalmasın')).toBe(
+        'ilik-goller-oksuz-kalmasin'
+      );
     });
   });
 });

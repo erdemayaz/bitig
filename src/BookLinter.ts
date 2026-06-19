@@ -23,16 +23,16 @@ export class BookLinter {
    */
   public runAllChecks(): LintMessage[] {
     const messages: LintMessage[] = [];
-    
+
     // Ensure files are scanned and loaded
     this.compiler.scanAndLoad();
-    
+
     const sections = this.compiler.sections;
     const allChapters: Chapter[] = [];
-    sections.forEach(s => allChapters.push(...s.chapters));
+    sections.forEach((s) => allChapters.push(...s.chapters));
 
     // 1. Check for empty chapters and unclosed code blocks
-    allChapters.forEach(chapter => {
+    allChapters.forEach((chapter) => {
       this._checkChapterSyntax(chapter, messages);
       this._checkChapterLinks(chapter, messages);
     });
@@ -45,8 +45,8 @@ export class BookLinter {
 
   /**
    * Check syntax: empty chapters or unclosed code blocks.
-   * @param chapter 
-   * @param messages 
+   * @param chapter
+   * @param messages
    */
   private _checkChapterSyntax(chapter: Chapter, messages: LintMessage[]): void {
     const lines = chapter.rawContent.split('\n');
@@ -77,8 +77,8 @@ export class BookLinter {
 
   /**
    * Check for broken internal Markdown links.
-   * @param chapter 
-   * @param messages 
+   * @param chapter
+   * @param messages
    */
   private _checkChapterLinks(chapter: Chapter, messages: LintMessage[]): void {
     const linkRegex = /\[.*?\]\((.*?\.md)(#.*?)?\)/g;
@@ -88,7 +88,7 @@ export class BookLinter {
       let match;
       // Reset regex index for safety in loop
       linkRegex.lastIndex = 0;
-      
+
       while ((match = linkRegex.exec(line)) !== null) {
         const linkTarget = match[1];
         if (linkTarget.startsWith('http://') || linkTarget.startsWith('https://')) {
@@ -113,21 +113,21 @@ export class BookLinter {
 
   /**
    * Check if configured citations are actually used.
-   * @param chapters 
-   * @param messages 
+   * @param chapters
+   * @param messages
    */
   private _checkCitationsUsage(chapters: Chapter[], messages: LintMessage[]): void {
     const rules = this.compiler.config.getCitationRules();
     if (rules.length === 0) return;
 
     const citationUsageMap = new Map<string, number>();
-    rules.forEach(rule => citationUsageMap.set(rule.term.source, 0));
+    rules.forEach((rule) => citationUsageMap.set(rule.term.source, 0));
 
-    chapters.forEach(chapter => {
+    chapters.forEach((chapter) => {
       const isBibliography = chapter.sectionNum === 999;
       if (isBibliography) return;
 
-      rules.forEach(rule => {
+      rules.forEach((rule) => {
         const matches = chapter.rawContent.match(rule.term);
         if (matches) {
           const currentCount = citationUsageMap.get(rule.term.source) || 0;
@@ -137,12 +137,12 @@ export class BookLinter {
     });
 
     // Find unused rules
-    this.compiler.config.citations.forEach(rule => {
-      const compiled = this.compiler.config.getCitationRules().find(r => {
+    this.compiler.config.citations.forEach((rule) => {
+      const compiled = this.compiler.config.getCitationRules().find((r) => {
         // Simple comparison of search terms
         return r.replacement === rule.replacement;
       });
-      
+
       if (compiled) {
         const count = citationUsageMap.get(compiled.term.source) || 0;
         if (count === 0) {

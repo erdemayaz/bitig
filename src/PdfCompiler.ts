@@ -12,19 +12,15 @@ export class PdfCompiler {
   public async compileToPdf(htmlContent: string, outputPath: string): Promise<string> {
     const absoluteOutputPath = path.resolve(outputPath);
     let browser = null;
-    
+
     try {
       browser = await puppeteer.launch({
         headless: true,
-        args: [
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-web-security'
-        ]
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-web-security']
       });
 
       const page = await browser.newPage();
-      
+
       // Set the content of the page
       await page.setContent(htmlContent, {
         waitUntil: 'networkidle0' // waits for @import fonts and stylesheets to load

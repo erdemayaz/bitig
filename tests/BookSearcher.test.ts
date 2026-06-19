@@ -19,7 +19,7 @@ describe('BookSearcher', () => {
     const chapter1 = new Chapter('assets/section-1/1.1.md', './assets');
     chapter1.title = 'Introduction';
     chapter1.rawContent = 'This chapter covers quantum consciousness and Orch-OR theory.';
-    
+
     const chapter2 = new Chapter('assets/section-1/1.2.md', './assets');
     chapter2.title = 'Deep Dive';
     chapter2.rawContent = 'Nothing here but normal text.';
@@ -35,7 +35,9 @@ describe('BookSearcher', () => {
     expect(results[0].file).toBe('section-1/1.1.md');
     expect(results[0].chapterTitle).toBe('Introduction');
     expect(results[0].lineNumber).toBe(1);
-    expect(results[0].lineContent).toBe('This chapter covers quantum consciousness and Orch-OR theory.');
+    expect(results[0].lineContent).toBe(
+      'This chapter covers quantum consciousness and Orch-OR theory.'
+    );
   });
 
   it('should be case-insensitive', () => {

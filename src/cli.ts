@@ -26,7 +26,11 @@ interface CliArgs {
 const args = process.argv.slice(2);
 const cliArgs = parseArgs(args);
 
-if (cliArgs.help || (cliArgs.command && cliArgs.command === 'help') || (!cliArgs.command && args.length > 0 && args[0].startsWith('-h'))) {
+if (
+  cliArgs.help ||
+  (cliArgs.command && cliArgs.command === 'help') ||
+  (!cliArgs.command && args.length > 0 && args[0].startsWith('-h'))
+) {
   showHelp();
   process.exit(0);
 }
@@ -78,7 +82,7 @@ switch (command) {
 
 /**
  * Command-line arguments parser.
- * @param args 
+ * @param args
  * @returns CliArgs
  */
 function parseArgs(args: string[]): CliArgs {
@@ -99,6 +103,8 @@ function parseArgs(args: string[]): CliArgs {
 
     if (arg === '-h' || arg === '--help') {
       result.help = true;
+    } else if (arg === '-g' || arg === '--guide') {
+      result.command = 'guide';
     } else if (arg === '-c' || arg === '--config') {
       if (i + 1 < args.length) {
         result.config = args[++i];
@@ -179,6 +185,7 @@ Commands:
 
 Global Options:
   -c, --config <path>            Path to the book configuration JSON file (default: ./book.json)
+  -g, --guide                    Displays the comprehensive English guide on book writing workflow.
 
 Build Options:
   -t, --theme <theme>            Override the visual theme (serif, sans-serif, academic).
@@ -229,28 +236,28 @@ function handleInit(): void {
   }
 
   const templateConfig: BookConfigData = {
-    title: "New Book Title",
-    subtitle: "Book Subtitle",
-    author: "Author Name",
-    description: "A brief description/summary of the book.",
-    theme: "serif",
-    assetsDir: "./assets",
-    distDir: "./dist",
-    outputFilename: "book.md",
-    epilogueFile: "epilogue.md",
-    bibliographyFile: "bibliography.md",
+    title: 'New Book Title',
+    subtitle: 'Book Subtitle',
+    author: 'Author Name',
+    description: 'A brief description/summary of the book.',
+    theme: 'serif',
+    assetsDir: './assets',
+    distDir: './dist',
+    outputFilename: 'book.md',
+    epilogueFile: 'epilogue.md',
+    bibliographyFile: 'bibliography.md',
     pdf: true,
     sectionTitles: {
-      "0": "Introduction and Preface",
-      "1": "Chapter 1: Foundations",
-      "2": "Chapter 2: Deep Dive",
-      "998": "Epilogue",
-      "999": "Bibliography"
+      '0': 'Introduction and Preface',
+      '1': 'Chapter 1: Foundations',
+      '2': 'Chapter 2: Deep Dive',
+      '998': 'Epilogue',
+      '999': 'Bibliography'
     },
     citations: [
       {
-        term: "quantum entanglement",
-        replacement: "quantum entanglement<sup>[1]</sup>"
+        term: 'quantum entanglement',
+        replacement: 'quantum entanglement<sup>[1]</sup>'
       }
     ]
   };
@@ -299,12 +306,12 @@ function handleInit(): void {
 
 /**
  * Loads configuration, applies CLI overrides, and runs the compiler.
- * @param cliArgs 
+ * @param cliArgs
  */
 async function handleBuild(cliArgs: CliArgs): Promise<void> {
   try {
     const config = loadConfig(cliArgs.config);
-    
+
     // Apply CLI argument overrides
     if (cliArgs.theme) {
       config.theme = cliArgs.theme;
@@ -320,14 +327,14 @@ async function handleBuild(cliArgs: CliArgs): Promise<void> {
     }
 
     const compiler = new BookCompiler(config);
-    
+
     console.log('📖 Loading configuration...');
     console.log('🔍 Scanning source files...');
     compiler.scanAndLoad();
-    
+
     console.log('⚙ Compiling book...');
     await compiler.writeOutputs();
-    
+
     console.log('✔ Book and AI metadata successfully compiled!');
   } catch (error) {
     const err = error as Error;
@@ -342,13 +349,15 @@ async function handleBuild(cliArgs: CliArgs): Promise<void> {
 function handleAddSection(cliArgs: CliArgs): void {
   const sectionNum = parseInt(cliArgs.positionals[0], 10);
   if (isNaN(sectionNum)) {
-    console.error('Error: Please specify a valid section number, e.g.: bitig add:section 3 --title "My New Section"');
+    console.error(
+      'Error: Please specify a valid section number, e.g.: bitig add:section 3 --title "My New Section"'
+    );
     process.exit(1);
   }
   const title = cliArgs.title || `Section ${sectionNum}`;
   const config = loadConfig(cliArgs.config);
   const manager = new BookManager(config, getConfigPath(cliArgs.config));
-  
+
   try {
     manager.addSection(sectionNum, title);
   } catch (error) {
@@ -364,10 +373,12 @@ function handleAddSection(cliArgs: CliArgs): void {
 function handleAddChapter(cliArgs: CliArgs): void {
   const target = cliArgs.positionals[0];
   if (!target) {
-    console.error('Error: Please specify target chapter coordinates, e.g.: bitig add:chapter 1.2 --title "My Chapter"');
+    console.error(
+      'Error: Please specify target chapter coordinates, e.g.: bitig add:chapter 1.2 --title "My Chapter"'
+    );
     process.exit(1);
   }
-  
+
   const parts = target.split('.');
   const sectionNum = parseInt(parts[0], 10);
   const chapterNum = parts.length > 1 ? parseInt(parts[1], 10) : 1;
@@ -380,7 +391,7 @@ function handleAddChapter(cliArgs: CliArgs): void {
   const title = cliArgs.title || `Chapter ${sectionNum}.${chapterNum}`;
   const config = loadConfig(cliArgs.config);
   const manager = new BookManager(config, getConfigPath(cliArgs.config));
-  
+
   try {
     manager.addChapter(sectionNum, chapterNum, title);
   } catch (error) {
@@ -396,15 +407,17 @@ function handleAddChapter(cliArgs: CliArgs): void {
 function handleMoveChapter(cliArgs: CliArgs): void {
   const from = cliArgs.positionals[0];
   const to = cliArgs.positionals[1];
-  
+
   if (!from || !to) {
-    console.error('Error: Please specify source and target chapter coordinates, e.g.: bitig move:chapter 1.1 1.2');
+    console.error(
+      'Error: Please specify source and target chapter coordinates, e.g.: bitig move:chapter 1.1 1.2'
+    );
     process.exit(1);
   }
 
   const fromParts = from.split('.');
   const toParts = to.split('.');
-  
+
   const fromSec = parseInt(fromParts[0], 10);
   const fromChap = parseInt(fromParts[1], 10);
   const toSec = parseInt(toParts[0], 10);
@@ -417,7 +430,7 @@ function handleMoveChapter(cliArgs: CliArgs): void {
 
   const config = loadConfig(cliArgs.config);
   const manager = new BookManager(config, getConfigPath(cliArgs.config));
-  
+
   try {
     manager.moveChapter(fromSec, fromChap, toSec, toChap);
   } catch (error) {
@@ -436,7 +449,7 @@ function handleDeleteChapter(cliArgs: CliArgs): void {
     console.error('Error: Please specify target chapter, e.g.: bitig delete:chapter 1.2');
     process.exit(1);
   }
-  
+
   const parts = target.split('.');
   const sectionNum = parseInt(parts[0], 10);
   const chapterNum = parseInt(parts[1], 10);
@@ -448,7 +461,7 @@ function handleDeleteChapter(cliArgs: CliArgs): void {
 
   const config = loadConfig(cliArgs.config);
   const manager = new BookManager(config, getConfigPath(cliArgs.config));
-  
+
   try {
     manager.deleteChapter(sectionNum, chapterNum);
   } catch (error) {
@@ -466,12 +479,12 @@ function handleStats(cliArgs: CliArgs): void {
     const config = loadConfig(cliArgs.config);
     const compiler = new BookCompiler(config);
     compiler.scanAndLoad();
-    
+
     if (!compiler.metadataGenerator) {
       console.error('Error: Failed to initialize metadata generator.');
       process.exit(1);
     }
-    
+
     const metadata = JSON.parse(compiler.metadataGenerator.generateJSONMetadata());
     console.log(`
 ============================================================
@@ -489,11 +502,13 @@ Total Characters:   ${metadata.stats.totalCharacters} characters
 Est. Reading Time:  ${metadata.stats.estimatedReadTimeMinutes} minutes
 
 [Structure Breakdown]`);
-    
+
     metadata.structure.forEach((sec: any) => {
       console.log(`\nSection ${sec.sectionNum}: "${sec.title}" (${sec.chaptersCount} chapters)`);
       sec.chapters.forEach((chap: any) => {
-        console.log(`  - Chapter ${sec.sectionNum}.${chap.chapterNum} "${chap.title}" (${chap.wordCount} words)`);
+        console.log(
+          `  - Chapter ${sec.sectionNum}.${chap.chapterNum} "${chap.title}" (${chap.wordCount} words)`
+        );
       });
     });
     console.log('\n============================================================');
@@ -512,10 +527,10 @@ function handleCheck(cliArgs: CliArgs): void {
     const config = loadConfig(cliArgs.config);
     const compiler = new BookCompiler(config);
     const linter = new BookLinter(compiler);
-    
+
     console.log('🔍 Running book diagnostics...');
     const messages = linter.runAllChecks();
-    
+
     if (messages.length === 0) {
       console.log('✔ No diagnostics issues found! Book is clean and AI-ready.');
       return;
@@ -524,7 +539,7 @@ function handleCheck(cliArgs: CliArgs): void {
     let errors = 0;
     let warnings = 0;
 
-    messages.forEach(msg => {
+    messages.forEach((msg) => {
       const badge = msg.type === 'error' ? '❌ [ERROR]' : '⚠️ [WARN]';
       if (msg.type === 'error') errors++;
       else warnings++;
@@ -584,7 +599,9 @@ function handleContext(cliArgs: CliArgs): void {
 function handleSearch(cliArgs: CliArgs): void {
   const query = cliArgs.positionals.join(' ');
   if (!query) {
-    console.error('Error: Please specify a search query, e.g.: bitig search "quantum consciousness"');
+    console.error(
+      'Error: Please specify a search query, e.g.: bitig search "quantum consciousness"'
+    );
     process.exit(1);
   }
 
@@ -602,7 +619,7 @@ function handleSearch(cliArgs: CliArgs): void {
     }
 
     console.log(`Found ${results.length} match(es):`);
-    results.forEach(res => {
+    results.forEach((res) => {
       console.log(`\n📄 ${res.file}:${res.lineNumber} [${res.chapterTitle}]`);
       console.log(`   > ${res.lineContent}`);
     });

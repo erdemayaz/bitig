@@ -21,7 +21,7 @@ jest.mock('fs', () => {
 
 describe('BookLinter', () => {
   let compiler: BookCompiler;
-  
+
   beforeEach(() => {
     jest.restoreAllMocks();
     const config = new BookConfig({
@@ -57,17 +57,17 @@ describe('BookLinter', () => {
     compiler.sections = [section];
 
     const linter = new BookLinter(compiler);
-    
+
     // Stub compiler.scanAndLoad so it doesn't try to read real files
     jest.spyOn(compiler, 'scanAndLoad').mockImplementation(() => {});
 
     const reports = linter.runAllChecks();
-    
-    const warnings = reports.filter(r => r.type === 'warning');
-    const errors = reports.filter(r => r.type === 'error');
 
-    expect(warnings.some(w => w.message.includes('empty or only contains'))).toBe(true);
-    expect(errors.some(e => e.message.includes('unclosed markdown code block'))).toBe(true);
+    const warnings = reports.filter((r) => r.type === 'warning');
+    const errors = reports.filter((r) => r.type === 'error');
+
+    expect(warnings.some((w) => w.message.includes('empty or only contains'))).toBe(true);
+    expect(errors.some((e) => e.message.includes('unclosed markdown code block'))).toBe(true);
   });
 
   it('should flag unused citation rules', () => {
@@ -85,13 +85,13 @@ describe('BookLinter', () => {
 
     // The unused term (apple term) should be flagged as a warning in book.json
     const unusedWarn = reports.find(
-      r => r.type === 'warning' && r.file === 'book.json' && r.message.includes('apple term')
+      (r) => r.type === 'warning' && r.file === 'book.json' && r.message.includes('apple term')
     );
     expect(unusedWarn).toBeDefined();
 
     // The used term (banana term) should NOT be flagged
     const usedWarn = reports.find(
-      r => r.type === 'warning' && r.file === 'book.json' && r.message.includes('banana term')
+      (r) => r.type === 'warning' && r.file === 'book.json' && r.message.includes('banana term')
     );
     expect(usedWarn).toBeUndefined();
   });
@@ -109,7 +109,7 @@ describe('BookLinter', () => {
 
     const reports = linter.runAllChecks();
     const linkError = reports.find(
-      r => r.type === 'error' && r.message.includes('Broken internal markdown link')
+      (r) => r.type === 'error' && r.message.includes('Broken internal markdown link')
     );
     expect(linkError).toBeDefined();
   });

@@ -24,7 +24,7 @@ export class BookCompiler {
     }
     this.config = config;
     this.sections = [];
-    
+
     this.styleManager = new StyleManager();
     if (this.config.customThemePath) {
       this.styleManager.useCustomTheme(this.config.customThemePath);
@@ -56,8 +56,12 @@ export class BookCompiler {
     try {
       const filesInAssets = fs.readdirSync(this.config.assetsDir);
       const folderNums = filesInAssets
-        .filter(f => fs.statSync(path.join(this.config.assetsDir, f)).isDirectory() && /^section-\d+$/i.test(f))
-        .map(f => {
+        .filter(
+          (f) =>
+            fs.statSync(path.join(this.config.assetsDir, f)).isDirectory() &&
+            /^section-\d+$/i.test(f)
+        )
+        .map((f) => {
           const match = f.match(/\d+/);
           return match ? parseInt(match[0], 10) : 0;
         });
@@ -70,7 +74,7 @@ export class BookCompiler {
 
     mdFiles.forEach((filePath) => {
       const filename = path.basename(filePath);
-      
+
       // Ignore SUMMARY.md and any configuration files
       if (filename.toLowerCase().includes('summary') || filename.toLowerCase() === 'book.json') {
         return;
@@ -79,14 +83,15 @@ export class BookCompiler {
       const chapter = new Chapter(filePath, this.config.assetsDir, specialFiles);
       chapter.load();
 
-      let section = this.sections.find(s => s.sectionNum === chapter.sectionNum);
+      let section = this.sections.find((s) => s.sectionNum === chapter.sectionNum);
       if (!section) {
         let sectionTitle = this.config.sectionTitles[String(chapter.sectionNum)];
         if (!sectionTitle) {
           if (chapter.sectionNum === 998) {
             sectionTitle = this.config.sectionTitles[String(maxFolderSection + 1)] || 'Epilogue';
           } else if (chapter.sectionNum === 999) {
-            sectionTitle = this.config.sectionTitles[String(maxFolderSection + 2)] || 'Bibliography';
+            sectionTitle =
+              this.config.sectionTitles[String(maxFolderSection + 2)] || 'Bibliography';
           } else {
             sectionTitle = `Section ${chapter.sectionNum}`;
           }
@@ -110,7 +115,7 @@ export class BookCompiler {
     this.sections.sort((a, b) => a.sectionNum - b.sectionNum);
 
     // 2. Sort chapters inside sections
-    this.sections.forEach(section => section.sortChapters());
+    this.sections.forEach((section) => section.sortChapters());
 
     // 3. Generate Table of Contents
     const tocHtml = TOCGenerator.generateHTML(this.sections);
@@ -135,7 +140,7 @@ export class BookCompiler {
       section.chapters.forEach((chapter, cIndex) => {
         // Shift headers
         let shifted = TextProcessor.shiftHeaders(chapter.rawContent);
-        
+
         // Apply citations if not the bibliography file
         const isBibliography = chapter.sectionNum === 999;
         if (!isBibliography) {
@@ -159,7 +164,7 @@ export class BookCompiler {
     // 5. Build HTML wrap for browser/PDF output
     const styleBlock = this.styleManager.getStyleBlock();
     const coverHtml = this.styleManager.generateCoverPage(this.config);
-    
+
     // Parse markdown body to HTML using marked (marked.parse returns string synchronously)
     const bodyHtml = marked.parse(markdownContent) as string;
 
@@ -215,14 +220,20 @@ export class BookCompiler {
     fs.writeFileSync(metaOutputPath, jsonMetadata, 'utf8');
 
     // 3. Write HTML file (useful for printing or debugging styles)
-    const htmlOutputPath = path.join(this.config.distDir, this.config.outputFilename.replace(/\.md$/, '.html'));
+    const htmlOutputPath = path.join(
+      this.config.distDir,
+      this.config.outputFilename.replace(/\.md$/, '.html')
+    );
     fs.writeFileSync(htmlOutputPath, html, 'utf8');
 
     // 4. If PDF output is desired, compile to PDF
     if (this.config.pdf) {
-      const pdfOutputPath = path.join(this.config.distDir, this.config.outputFilename.replace(/\.md$/, '.pdf'));
+      const pdfOutputPath = path.join(
+        this.config.distDir,
+        this.config.outputFilename.replace(/\.md$/, '.pdf')
+      );
       const pdfCompiler = new PdfCompiler();
-      
+
       console.log(`Generating PDF output: ${pdfOutputPath}...`);
       await pdfCompiler.compileToPdf(html, pdfOutputPath);
     } else {
@@ -232,7 +243,7 @@ export class BookCompiler {
 
   /**
    * Recursive directory crawler.
-   * @param dir 
+   * @param dir
    * @private
    */
   private _getMarkdownFiles(dir: string): string[] {

@@ -14,8 +14,8 @@ export class BookManager {
 
   /**
    * Adds a new section to the book config and directory structure.
-   * @param sectionNum 
-   * @param title 
+   * @param sectionNum
+   * @param title
    */
   public addSection(sectionNum: number, title: string): void {
     const sectionDir = path.join(this.config.assetsDir, `section-${sectionNum}`);
@@ -30,15 +30,17 @@ export class BookManager {
     }
     rawData.sectionTitles[String(sectionNum)] = title;
     this._writeRawConfig(rawData);
-    
-    console.log(`✔ Section ${sectionNum} directory created and titled "${title}" in configuration.`);
+
+    console.log(
+      `✔ Section ${sectionNum} directory created and titled "${title}" in configuration.`
+    );
   }
 
   /**
    * Adds a new chapter markdown file.
-   * @param sectionNum 
-   * @param chapterNum 
-   * @param title 
+   * @param sectionNum
+   * @param chapterNum
+   * @param title
    */
   public addChapter(sectionNum: number, chapterNum: number, title: string): void {
     const isSpecial = sectionNum >= 998;
@@ -46,9 +48,10 @@ export class BookManager {
     let filename = '';
 
     if (isSpecial) {
-      filename = sectionNum === 998 
-        ? (this.config.rawConfig.epilogueFile || 'epilogue.md')
-        : (this.config.rawConfig.bibliographyFile || 'bibliography.md');
+      filename =
+        sectionNum === 998
+          ? this.config.rawConfig.epilogueFile || 'epilogue.md'
+          : this.config.rawConfig.bibliographyFile || 'bibliography.md';
     } else {
       targetDir = path.join(this.config.assetsDir, `section-${sectionNum}`);
       filename = `${sectionNum}.${chapterNum}.md`;
@@ -71,10 +74,10 @@ export class BookManager {
 
   /**
    * Moves a chapter from one section/number to another.
-   * @param fromSec 
-   * @param fromChap 
-   * @param toSec 
-   * @param toChap 
+   * @param fromSec
+   * @param fromChap
+   * @param toSec
+   * @param toChap
    */
   public moveChapter(fromSec: number, fromChap: number, toSec: number, toChap: number): void {
     const fromFilename = `${fromSec}.${fromChap}.md`;
@@ -102,8 +105,8 @@ export class BookManager {
 
   /**
    * Deletes a chapter markdown file.
-   * @param sectionNum 
-   * @param chapterNum 
+   * @param sectionNum
+   * @param chapterNum
    */
   public deleteChapter(sectionNum: number, chapterNum: number): void {
     const filename = `${sectionNum}.${chapterNum}.md`;

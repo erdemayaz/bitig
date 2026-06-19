@@ -19,9 +19,10 @@ describe('AgentMetadataGenerator', () => {
     const section1 = new Section(1, 'Part One');
     const chapter1 = new Chapter('assets/section-1/1.1.md', './assets');
     chapter1.title = 'Hello';
-    chapter1.rawContent = 'This is the first paragraph. It is long enough to generate a nice synopsis if we wanted to, but we keep it short.';
+    chapter1.rawContent =
+      'This is the first paragraph. It is long enough to generate a nice synopsis if we wanted to, but we keep it short.';
     section1.addChapter(chapter1);
-    
+
     sections = [section1];
     generator = new AgentMetadataGenerator(config, sections);
   });

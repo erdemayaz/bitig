@@ -5,7 +5,7 @@ export class TOCGenerator {
   /**
    * Generates a beautifully formatted HTML Table of Contents.
    * Compatible with print stylesheets and PDF layouts.
-   * @param sections 
+   * @param sections
    * @returns string
    */
   public static generateHTML(sections: Section[]): string {
@@ -20,10 +20,10 @@ export class TOCGenerator {
 
       tocHtml += `    <div class="toc-section">\n`;
       tocHtml += `      <div class="toc-section-title"><a href="#${sectionSlug}">${section.title}</a></div>\n`;
-      
+
       if (section.chapters && section.chapters.length > 0) {
         tocHtml += `      <ul class="toc-chapters">\n`;
-        
+
         section.chapters.forEach((chapter) => {
           let prefix = '';
           // Only show numerical prefix for regular chapters, not epilogue/bibliography or section 0 (preface)
@@ -34,10 +34,10 @@ export class TOCGenerator {
           const chapterSlug = TextProcessor.slugify(chapter.title);
           tocHtml += `        <li><a href="#${chapterSlug}">${fullChapterTitle}</a></li>\n`;
         });
-        
+
         tocHtml += `      </ul>\n`;
       }
-      
+
       tocHtml += `    </div>\n`;
     });
 
@@ -47,7 +47,7 @@ export class TOCGenerator {
 
   /**
    * Generates a standard Markdown Table of Contents.
-   * @param sections 
+   * @param sections
    * @returns string
    */
   public static generateMarkdown(sections: Section[]): string {
@@ -59,7 +59,7 @@ export class TOCGenerator {
       const isSpecialSection = section.sectionNum >= 998;
       const sectionSlug = TextProcessor.slugify(section.title);
       tocMd += `## [${section.title}](#${sectionSlug})\n`;
-      
+
       if (section.chapters && section.chapters.length > 0) {
         section.chapters.forEach((chapter) => {
           let prefix = '';

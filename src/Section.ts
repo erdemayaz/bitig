@@ -13,7 +13,7 @@ export class Section {
 
   /**
    * Adds a chapter to the section.
-   * @param chapter 
+   * @param chapter
    */
   public addChapter(chapter: Chapter): void {
     this.chapters.push(chapter);

@@ -1,5 +1,5 @@
-import { BookConfig } from "./BookConfig";
-import { Section } from "./Section";
+import { BookConfig } from './BookConfig';
+import { Section } from './Section';
 
 export interface ChapterMetadata {
   chapterNum: number;
@@ -53,57 +53,50 @@ export class AgentMetadataGenerator {
     let totalChars = 0;
     let totalChapters = 0;
 
-    const sectionsData: SectionMetadata[] = this.sections.map(
-      (section): SectionMetadata => {
-        const chaptersData: ChapterMetadata[] = section.chapters.map(
-          (chapter): ChapterMetadata => {
-            const wordCount = this._countWords(chapter.rawContent);
-            const charCount = chapter.rawContent
-              ? chapter.rawContent.length
-              : 0;
+    const sectionsData: SectionMetadata[] = this.sections.map((section): SectionMetadata => {
+      const chaptersData: ChapterMetadata[] = section.chapters.map((chapter): ChapterMetadata => {
+        const wordCount = this._countWords(chapter.rawContent);
+        const charCount = chapter.rawContent ? chapter.rawContent.length : 0;
 
-            totalWords += wordCount;
-            totalChars += charCount;
-            totalChapters += 1;
+        totalWords += wordCount;
+        totalChars += charCount;
+        totalChapters += 1;
 
-            const paragraphs = chapter.rawContent
-              .split("\n")
-              .map((p) => p.trim())
-              .filter(
-                (p) =>
-                  p &&
-                  !p.startsWith("#") &&
-                  !p.startsWith("```") &&
-                  !p.startsWith(">") &&
-                  !p.startsWith("-") &&
-                  !p.startsWith("*"),
-              );
+        const paragraphs = chapter.rawContent
+          .split('\n')
+          .map((p) => p.trim())
+          .filter(
+            (p) =>
+              p &&
+              !p.startsWith('#') &&
+              !p.startsWith('```') &&
+              !p.startsWith('>') &&
+              !p.startsWith('-') &&
+              !p.startsWith('*')
+          );
 
-            const synopsis =
-              paragraphs.length > 0
-                ? paragraphs[0].slice(0, 250) +
-                  (paragraphs[0].length > 250 ? "..." : "")
-                : "";
-
-            return {
-              chapterNum: chapter.chapterNum,
-              title: chapter.title,
-              wordCount,
-              characterCount: charCount,
-              synopsis,
-              fileRelativePath: chapter.relativePath,
-            };
-          },
-        );
+        const synopsis =
+          paragraphs.length > 0
+            ? paragraphs[0].slice(0, 250) + (paragraphs[0].length > 250 ? '...' : '')
+            : '';
 
         return {
-          sectionNum: section.sectionNum,
-          title: section.title,
-          chaptersCount: chaptersData.length,
-          chapters: chaptersData,
+          chapterNum: chapter.chapterNum,
+          title: chapter.title,
+          wordCount,
+          characterCount: charCount,
+          synopsis,
+          fileRelativePath: chapter.relativePath
         };
-      },
-    );
+      });
+
+      return {
+        sectionNum: section.sectionNum,
+        title: section.title,
+        chaptersCount: chaptersData.length,
+        chapters: chaptersData
+      };
+    });
 
     const metadata: BookMetadata = {
       book: {
@@ -111,16 +104,16 @@ export class AgentMetadataGenerator {
         subtitle: this.bookConfig.subtitle,
         author: this.bookConfig.author,
         description: this.bookConfig.description,
-        theme: this.bookConfig.theme,
+        theme: this.bookConfig.theme
       },
       stats: {
         totalSections: this.sections.length,
         totalChapters,
         totalWords,
         totalCharacters: totalChars,
-        estimatedReadTimeMinutes: Math.ceil(totalWords / 200),
+        estimatedReadTimeMinutes: Math.ceil(totalWords / 200)
       },
-      structure: sectionsData,
+      structure: sectionsData
     };
 
     return JSON.stringify(metadata, null, 2);
@@ -134,12 +127,10 @@ export class AgentMetadataGenerator {
   public injectYAMLFrontmatter(assembledContent: string): string {
     const sectionsSummary = this.sections
       .map((section) => {
-        const chapterTitles = section.chapters
-          .map((c) => `"${c.title}"`)
-          .join(", ");
+        const chapterTitles = section.chapters.map((c) => `"${c.title}"`).join(', ');
         return `    - section: ${section.sectionNum}\n      title: "${section.title}"\n      chapters: [${chapterTitles}]`;
       })
-      .join("\n");
+      .join('\n');
 
     const yaml = `---
 title: "${this.bookConfig.title.replace(/"/g, '\\"')}"
@@ -163,7 +154,7 @@ ${sectionsSummary}
    */
   private _countWords(text: string): number {
     if (!text) return 0;
-    const cleanText = text.replace(/[#*`_\[\]()\-]/g, " ");
+    const cleanText = text.replace(/[#*`_\[\]()\-]/g, ' ');
     const words = cleanText.trim().split(/\s+/);
     return words.filter((w) => w.length > 0).length;
   }

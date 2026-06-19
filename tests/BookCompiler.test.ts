@@ -28,7 +28,7 @@ jest.mock('fs', () => {
     statSync: jest.fn((p) => {
       if (typeof p === 'string' && (p.includes('assets') || p.includes('section'))) {
         return {
-          isDirectory: () => p.includes('section-1') && !p.endsWith('.md'),
+          isDirectory: () => p.includes('section-1') && !p.endsWith('.md')
         };
       }
       return originalFs.statSync(p);
@@ -93,13 +93,13 @@ describe('BookCompiler', () => {
   describe('compile and writeOutputs', () => {
     it('should assemble markdown and HTML outputs and trigger PDF compile if enabled', async () => {
       const compiler = new BookCompiler(config);
-      
+
       const section = new Section(1, 'Part One');
       const chapter = new Chapter('assets/section-1/1.1.md', './assets');
       chapter.title = 'Start';
       chapter.rawContent = '# Start\nThis is content.';
       section.addChapter(chapter);
-      
+
       compiler.sections = [section];
       compiler.metadataGenerator = {
         generateJSONMetadata: () => '{}',
@@ -113,9 +113,21 @@ describe('BookCompiler', () => {
 
       await compiler.writeOutputs();
 
-      expect(fs.writeFileSync).toHaveBeenCalledWith(expect.stringContaining('book.md'), expect.stringContaining('YAML'), 'utf8');
-      expect(fs.writeFileSync).toHaveBeenCalledWith(expect.stringContaining('book-metadata.json'), '{}', 'utf8');
-      expect(fs.writeFileSync).toHaveBeenCalledWith(expect.stringContaining('book.html'), expect.any(String), 'utf8');
+      expect(fs.writeFileSync).toHaveBeenCalledWith(
+        expect.stringContaining('book.md'),
+        expect.stringContaining('YAML'),
+        'utf8'
+      );
+      expect(fs.writeFileSync).toHaveBeenCalledWith(
+        expect.stringContaining('book-metadata.json'),
+        '{}',
+        'utf8'
+      );
+      expect(fs.writeFileSync).toHaveBeenCalledWith(
+        expect.stringContaining('book.html'),
+        expect.any(String),
+        'utf8'
+      );
       expect(mockCompileToPdf).toHaveBeenCalled();
     });
   });

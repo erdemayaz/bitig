@@ -44,12 +44,14 @@ describe('BookConfig', () => {
   describe('loadFromFile', () => {
     it('should load config JSON and resolve relative paths', () => {
       (fs.existsSync as jest.Mock).mockReturnValue(true);
-      (fs.readFileSync as jest.Mock).mockReturnValue(JSON.stringify({
-        title: 'File Book',
-        assetsDir: './my-assets',
-        distDir: './my-dist',
-        customThemePath: './custom.css'
-      }));
+      (fs.readFileSync as jest.Mock).mockReturnValue(
+        JSON.stringify({
+          title: 'File Book',
+          assetsDir: './my-assets',
+          distDir: './my-dist',
+          customThemePath: './custom.css'
+        })
+      );
 
       const config = BookConfig.loadFromFile('/path/to/book.json');
       expect(config.title).toBe('File Book');
@@ -77,14 +79,16 @@ describe('BookConfig', () => {
 
       const compiled = config.getCitationRules();
       expect(compiled.length).toBe(1);
-      
+
       const rule = compiled[0];
       expect(rule.replacement).toBe('Orch-OR<sup>[1]</sup>');
-      
+
       // The term should be a RegExp matching the string literally
       const testString = 'The Orch-OR *(Orchestrated)* theory.';
       expect(testString.match(rule.term)).toBeTruthy();
-      expect(testString.replace(rule.term, rule.replacement)).toBe('The Orch-OR<sup>[1]</sup> theory.');
+      expect(testString.replace(rule.term, rule.replacement)).toBe(
+        'The Orch-OR<sup>[1]</sup> theory.'
+      );
     });
   });
 });
