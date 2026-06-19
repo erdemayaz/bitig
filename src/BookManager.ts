@@ -31,9 +31,7 @@ export class BookManager {
     rawData.sectionTitles[String(sectionNum)] = title;
     this._writeRawConfig(rawData);
 
-    console.log(
-      `✔ Section ${sectionNum} directory created and titled "${title}" in configuration.`
-    );
+    console.log(`Section ${sectionNum} directory created and titled "${title}" in configuration.`);
   }
 
   /**
@@ -69,7 +67,7 @@ export class BookManager {
     const templateContent = `# ${title}\n\nThis is chapter ${sectionNum}.${chapterNum} titled "${title}". Fill in the content.\n`;
     fs.writeFileSync(filePath, templateContent, 'utf8');
 
-    console.log(`✔ Chapter created at: ${filePath}`);
+    console.log(`Chapter created at: ${filePath}`);
   }
 
   /**
@@ -100,7 +98,7 @@ export class BookManager {
     }
 
     fs.renameSync(fromPath, toPath);
-    console.log(`✔ Moved chapter from ${fromPath} to ${toPath}`);
+    console.log(`Moved chapter from ${fromPath} to ${toPath}`);
   }
 
   /**
@@ -117,7 +115,7 @@ export class BookManager {
     }
 
     fs.unlinkSync(filePath);
-    console.log(`✔ Chapter deleted: ${filePath}`);
+    console.log(`Chapter deleted: ${filePath}`);
   }
 
   /**

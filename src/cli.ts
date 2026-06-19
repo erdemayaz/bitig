@@ -264,7 +264,7 @@ function handleInit(): void {
 
   try {
     fs.writeFileSync(configPath, JSON.stringify(templateConfig, null, 2), 'utf8');
-    console.log('✔ book.json created.');
+    console.log('book.json created.');
 
     const assetsDir = path.join(currentDir, 'assets');
     const section0Dir = path.join(assetsDir, 'section-0');
@@ -294,7 +294,7 @@ function handleInit(): void {
       'utf8'
     );
 
-    console.log('✔ Sample chapter directories and markdown files (assets/) created.');
+    console.log('Sample chapter directories and markdown files (assets/) created.');
     console.log('\nSuccess! To compile the book, run:');
     console.log('  bitig build');
   } catch (error) {
@@ -328,17 +328,17 @@ async function handleBuild(cliArgs: CliArgs): Promise<void> {
 
     const compiler = new BookCompiler(config);
 
-    console.log('📖 Loading configuration...');
-    console.log('🔍 Scanning source files...');
+    console.log('Loading configuration...');
+    console.log('Scanning source files...');
     compiler.scanAndLoad();
 
-    console.log('⚙ Compiling book...');
+    console.log('Compiling book...');
     await compiler.writeOutputs();
 
-    console.log('✔ Book and AI metadata successfully compiled!');
+    console.log('Book and AI metadata successfully compiled!');
   } catch (error) {
     const err = error as Error;
-    console.error('❌ Compilation Failed:', err.message);
+    console.error('Compilation Failed:', err.message);
     process.exit(1);
   }
 }
@@ -362,7 +362,7 @@ function handleAddSection(cliArgs: CliArgs): void {
     manager.addSection(sectionNum, title);
   } catch (error) {
     const err = error as Error;
-    console.error('❌ Failed to add section:', err.message);
+    console.error('Failed to add section:', err.message);
     process.exit(1);
   }
 }
@@ -396,7 +396,7 @@ function handleAddChapter(cliArgs: CliArgs): void {
     manager.addChapter(sectionNum, chapterNum, title);
   } catch (error) {
     const err = error as Error;
-    console.error('❌ Failed to add chapter:', err.message);
+    console.error('Failed to add chapter:', err.message);
     process.exit(1);
   }
 }
@@ -435,7 +435,7 @@ function handleMoveChapter(cliArgs: CliArgs): void {
     manager.moveChapter(fromSec, fromChap, toSec, toChap);
   } catch (error) {
     const err = error as Error;
-    console.error('❌ Failed to move chapter:', err.message);
+    console.error('Failed to move chapter:', err.message);
     process.exit(1);
   }
 }
@@ -466,7 +466,7 @@ function handleDeleteChapter(cliArgs: CliArgs): void {
     manager.deleteChapter(sectionNum, chapterNum);
   } catch (error) {
     const err = error as Error;
-    console.error('❌ Failed to delete chapter:', err.message);
+    console.error('Failed to delete chapter:', err.message);
     process.exit(1);
   }
 }
@@ -488,7 +488,7 @@ function handleStats(cliArgs: CliArgs): void {
     const metadata = JSON.parse(compiler.metadataGenerator.generateJSONMetadata());
     console.log(`
 ============================================================
-📖 BOOK STATUS REPORT: "${metadata.book.title}"
+BOOK STATUS REPORT: "${metadata.book.title}"
 ============================================================
 Author:             ${metadata.book.author}
 Subtitle:           ${metadata.book.subtitle || 'N/A'}
@@ -514,7 +514,7 @@ Est. Reading Time:  ${metadata.stats.estimatedReadTimeMinutes} minutes
     console.log('\n============================================================');
   } catch (error) {
     const err = error as Error;
-    console.error('❌ Failed to load statistics:', err.message);
+    console.error('Failed to load statistics:', err.message);
     process.exit(1);
   }
 }
@@ -528,11 +528,11 @@ function handleCheck(cliArgs: CliArgs): void {
     const compiler = new BookCompiler(config);
     const linter = new BookLinter(compiler);
 
-    console.log('🔍 Running book diagnostics...');
+    console.log('Running book diagnostics...');
     const messages = linter.runAllChecks();
 
     if (messages.length === 0) {
-      console.log('✔ No diagnostics issues found! Book is clean and AI-ready.');
+      console.log('No diagnostics issues found! Book is clean and AI-ready.');
       return;
     }
 
@@ -540,7 +540,7 @@ function handleCheck(cliArgs: CliArgs): void {
     let warnings = 0;
 
     messages.forEach((msg) => {
-      const badge = msg.type === 'error' ? '❌ [ERROR]' : '⚠️ [WARN]';
+      const badge = msg.type === 'error' ? '[ERROR]' : '[WARN]';
       if (msg.type === 'error') errors++;
       else warnings++;
 
@@ -554,7 +554,7 @@ function handleCheck(cliArgs: CliArgs): void {
     }
   } catch (error) {
     const err = error as Error;
-    console.error('❌ Diagnostics failed to run:', err.message);
+    console.error('Diagnostics failed to run:', err.message);
     process.exit(1);
   }
 }
@@ -583,12 +583,12 @@ function handleContext(cliArgs: CliArgs): void {
     const compiler = new BookCompiler(config);
     const packager = new ContextPackager(compiler);
 
-    console.log(`📦 Packaging AI context for chapter ${sectionNum}.${chapterNum}...`);
+    console.log(`Packaging AI context for chapter ${sectionNum}.${chapterNum}...`);
     const pack = packager.packageContextFor(sectionNum, chapterNum);
     console.log('\n' + pack);
   } catch (error) {
     const err = error as Error;
-    console.error('❌ Failed to package context:', err.message);
+    console.error('Failed to package context:', err.message);
     process.exit(1);
   }
 }
@@ -610,7 +610,7 @@ function handleSearch(cliArgs: CliArgs): void {
     const compiler = new BookCompiler(config);
     const searcher = new BookSearcher(compiler);
 
-    console.log(`🔍 Searching for "${query}"...`);
+    console.log(`Searching for "${query}"...`);
     const results = searcher.search(query);
 
     if (results.length === 0) {
@@ -620,12 +620,12 @@ function handleSearch(cliArgs: CliArgs): void {
 
     console.log(`Found ${results.length} match(es):`);
     results.forEach((res) => {
-      console.log(`\n📄 ${res.file}:${res.lineNumber} [${res.chapterTitle}]`);
+      console.log(`\n${res.file}:${res.lineNumber} [${res.chapterTitle}]`);
       console.log(`   > ${res.lineContent}`);
     });
   } catch (error) {
     const err = error as Error;
-    console.error('❌ Search failed:', err.message);
+    console.error('Search failed:', err.message);
     process.exit(1);
   }
 }
