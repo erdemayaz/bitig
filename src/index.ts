@@ -12,3 +12,4 @@ export { BookManager } from './BookManager';
 export { BookLinter, LintMessage } from './BookLinter';
 export { ContextPackager } from './ContextPackager';
 export { BookSearcher, SearchResult } from './BookSearcher';
+export { Locale } from './Locale';

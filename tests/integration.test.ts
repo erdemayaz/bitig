@@ -13,7 +13,7 @@ describe('Bitig CLI Integration Tests', () => {
   });
 
   afterEach(() => {
-    // Recursively clean up the temp directory after each test to ensure no leftover files
+    // Clean up the temp directory after each test
     if (tempDir && fs.existsSync(tempDir)) {
       fs.rmSync(tempDir, { recursive: true, force: true });
     }
@@ -30,7 +30,8 @@ describe('Bitig CLI Integration Tests', () => {
 
     const configContent = fs.readFileSync(path.join(tempDir, 'book.json'), 'utf8');
     const config = JSON.parse(configContent);
-    expect(config.title).toBe('New Book Title');
+    expect(config.title).toBe('Yeni Kitap Başlığı');
+    expect(config.language).toBe('tr');
   });
 
   it('should execute scaffolding and directory management commands', () => {
@@ -67,31 +68,31 @@ describe('Bitig CLI Integration Tests', () => {
 
     // Test stats command
     const statsOutput = execSync(`node ${cliPath} stats`, { cwd: tempDir, encoding: 'utf8' });
-    expect(statsOutput).toContain('BOOK STATUS REPORT');
-    expect(statsOutput).toContain('Total Chapters:     4');
+    expect(statsOutput).toContain('KİTAP DURUM RAPORU');
+    expect(statsOutput).toContain('Toplam Bölüm:     4');
 
     // Test check/lint command
     const checkOutput = execSync(`node ${cliPath} check`, { cwd: tempDir, encoding: 'utf8' });
-    expect(checkOutput).toContain('Running book diagnostics');
-    // Default template has 1 warning because "Quantum entanglement" is capitalized but citation term "quantum entanglement" is lowercase
-    expect(checkOutput).toContain('Diagnostics finished: 0 errors, 1 warnings found.');
+    expect(checkOutput).toContain('Tanılamalar çalıştırılıyor');
+    // Default template has 1 warning because "Kuantum dolanıklığı" is capitalized but citation term "kuantum dolanıklığı" is lowercase
+    expect(checkOutput).toContain('Tanılama tamamlandı: 0 hata, 1 uyarı bulundu.');
 
     // Test search command
-    const searchOutput = execSync(`node ${cliPath} search "quantum"`, {
+    const searchOutput = execSync(`node ${cliPath} search "kuantum"`, {
       cwd: tempDir,
       encoding: 'utf8'
     });
-    expect(searchOutput).toContain('Searching for "quantum"');
-    expect(searchOutput).toContain('Found 1 match');
+    expect(searchOutput).toContain('"kuantum" için arama yapılıyor');
+    expect(searchOutput).toContain('1 eşleşme bulundu');
 
     // Test context command
     const contextOutput = execSync(`node ${cliPath} context 1.1`, {
       cwd: tempDir,
       encoding: 'utf8'
     });
-    expect(contextOutput).toContain('BOOK WRITING CONTEXT PACK');
-    expect(contextOutput).toContain('Section 1, Chapter 1');
-    expect(contextOutput).toContain('Foundations and the World');
+    expect(contextOutput).toContain('KİTAP YAZIM BAĞLAM PAKETİ');
+    expect(contextOutput).toContain('Kısım 1, Bölüm 1');
+    expect(contextOutput).toContain('Temeller ve Dünya');
   });
 
   it('should compile the book to dist outputs including PDF', () => {
@@ -109,7 +110,7 @@ describe('Bitig CLI Integration Tests', () => {
     // Verify metadata structure
     const metaContent = fs.readFileSync(path.join(distPath, 'book-metadata.json'), 'utf8');
     const metadata = JSON.parse(metaContent);
-    expect(metadata.book.title).toBe('New Book Title');
+    expect(metadata.book.title).toBe('Yeni Kitap Başlığı');
     expect(metadata.stats.totalChapters).toBe(4);
   });
 });

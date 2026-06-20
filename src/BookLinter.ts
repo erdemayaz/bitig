@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { BookCompiler } from './BookCompiler';
 import { Chapter } from './Chapter';
+import { Locale } from './Locale';
 
 export interface LintMessage {
   type: 'error' | 'warning';
@@ -56,7 +57,7 @@ export class BookLinter {
       messages.push({
         type: 'warning',
         file: chapter.relativePath,
-        message: 'Chapter is empty or only contains a title.'
+        message: Locale.get('linterEmpty', this.compiler.config.language)
       });
     }
 
@@ -70,7 +71,7 @@ export class BookLinter {
       messages.push({
         type: 'error',
         file: chapter.relativePath,
-        message: 'Contains an unclosed markdown code block (odd number of triple backticks).'
+        message: Locale.get('linterUnclosedCode', this.compiler.config.language)
       });
     }
   }
@@ -104,7 +105,9 @@ export class BookLinter {
             type: 'error',
             file: chapter.relativePath,
             line: idx + 1,
-            message: `Broken internal markdown link: "${linkTarget}" does not exist.`
+            message: Locale.get('linterBrokenLink', this.compiler.config.language, {
+              target: linkTarget
+            })
           });
         }
       }
@@ -149,7 +152,9 @@ export class BookLinter {
           messages.push({
             type: 'warning',
             file: 'book.json',
-            message: `Citation term "${rule.term}" is defined in config but never matched in the book content.`
+            message: Locale.get('linterUnusedCitation', this.compiler.config.language, {
+              term: rule.term
+            })
           });
         }
       }

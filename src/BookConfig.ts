@@ -14,6 +14,7 @@ export class BookConfig {
   public theme: string;
   public customThemePath: string;
   public pdf: boolean;
+  public language: string;
   public citations: CitationRule[];
   public rawConfig: BookConfigData;
 
@@ -29,6 +30,7 @@ export class BookConfig {
     this.theme = configData.theme || 'serif';
     this.customThemePath = configData.customThemePath || '';
     this.pdf = configData.pdf !== false; // defaults to true
+    this.language = configData.language || 'tr';
     this.citations = configData.citations || [];
 
     this.rawConfig = {
@@ -43,6 +45,7 @@ export class BookConfig {
       theme: this.theme,
       customThemePath: this.customThemePath,
       pdf: this.pdf,
+      language: this.language,
       citations: this.citations,
       ...configData
     };
@@ -99,6 +102,9 @@ export class BookConfig {
     }
     if (!this.outputFilename || typeof this.outputFilename !== 'string') {
       throw new Error('Config Error: "outputFilename" must be a valid string.');
+    }
+    if (this.language && typeof this.language !== 'string') {
+      throw new Error('Config Error: "language" must be a valid string.');
     }
     return true;
   }

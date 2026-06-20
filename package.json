@@ -1,6 +1,6 @@
 {
   "name": "@erdemayaz/bitig",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "TypeScript OOP-based book compiling and formatting package with Puppeteer PDF generation and AI agent metadata support.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

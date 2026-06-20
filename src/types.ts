@@ -26,6 +26,7 @@ export interface BookConfigData {
   epilogueFile?: string;
   bibliographyFile?: string;
   pdf?: boolean;
+  language?: string;
   citations?: CitationRule[];
 }
 

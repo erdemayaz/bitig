@@ -29,16 +29,21 @@ describe('TOCGenerator', () => {
       expect(TOCGenerator.generateHTML([])).toBe('');
     });
 
-    it('should render HTML layout with appropriate section titles and anchors', () => {
-      const html = TOCGenerator.generateHTML(sections);
+    it('should render HTML layout with appropriate section titles and anchors in English', () => {
+      const html = TOCGenerator.generateHTML(sections, 'en');
       expect(html).toContain('TABLE OF CONTENTS');
       expect(html).toContain('href="#preface"');
       expect(html).toContain('href="#chapter-one"');
       expect(html).toContain('href="#epilogue"');
     });
 
-    it('should prefix numerical chapters only for regular sections (section > 0 and < 998)', () => {
-      const html = TOCGenerator.generateHTML(sections);
+    it('should render HTML layout with appropriate section titles and anchors in Turkish', () => {
+      const html = TOCGenerator.generateHTML(sections, 'tr');
+      expect(html).toContain('İÇİNDEKİLER');
+    });
+
+    it('should prefix numerical chapters only for regular sections (section > 0 and < 998) in English', () => {
+      const html = TOCGenerator.generateHTML(sections, 'en');
       // Section 0 chapter should not have a numerical prefix in the label
       expect(html).toContain('<li><a href="#introduction">Introduction</a></li>');
       // Section 1 chapter should have numerical prefix 1.1
@@ -53,13 +58,18 @@ describe('TOCGenerator', () => {
       expect(TOCGenerator.generateMarkdown([])).toBe('');
     });
 
-    it('should render markdown structure with anchors', () => {
-      const md = TOCGenerator.generateMarkdown(sections);
+    it('should render markdown structure with anchors in English', () => {
+      const md = TOCGenerator.generateMarkdown(sections, 'en');
       expect(md).toContain('# Table of Contents');
       expect(md).toContain('## [Preface](#preface)');
       expect(md).toContain('## [Chapter One](#chapter-one)');
       expect(md).toContain('* [1.1 Deep Space](#deep-space)');
       expect(md).toContain('* [The End](#the-end)');
+    });
+
+    it('should render markdown structure with anchors in Turkish', () => {
+      const md = TOCGenerator.generateMarkdown(sections, 'tr');
+      expect(md).toContain('# İçindekiler');
     });
   });
 });

@@ -9,6 +9,7 @@ import { BookManager } from './BookManager';
 import { BookLinter } from './BookLinter';
 import { ContextPackager } from './ContextPackager';
 import { BookSearcher } from './BookSearcher';
+import { Locale } from './Locale';
 
 interface CliArgs {
   command?: string;
@@ -224,7 +225,7 @@ function loadConfig(configArg?: string): BookConfig {
 }
 
 /**
- * Initializes a template project directory.
+ * Initializes a template project directory in Turkish by default.
  */
 function handleInit(): void {
   const currentDir = process.cwd();
@@ -236,10 +237,10 @@ function handleInit(): void {
   }
 
   const templateConfig: BookConfigData = {
-    title: 'New Book Title',
-    subtitle: 'Book Subtitle',
-    author: 'Author Name',
-    description: 'A brief description/summary of the book.',
+    title: 'Yeni Kitap Başlığı',
+    subtitle: 'Kitap Alt Başlığı',
+    author: 'Yazar Adı',
+    description: 'Kitap açıklaması veya özeti buraya yazılır.',
     theme: 'serif',
     assetsDir: './assets',
     distDir: './dist',
@@ -247,24 +248,25 @@ function handleInit(): void {
     epilogueFile: 'epilogue.md',
     bibliographyFile: 'bibliography.md',
     pdf: true,
+    language: 'tr',
     sectionTitles: {
-      '0': 'Introduction and Preface',
-      '1': 'Chapter 1: Foundations',
-      '2': 'Chapter 2: Deep Dive',
-      '998': 'Epilogue',
-      '999': 'Bibliography'
+      '0': 'Giriş ve Önsöz',
+      '1': '1. Bölüm: Temeller',
+      '2': '2. Bölüm: Derin Dalış',
+      '998': 'Son Söz',
+      '999': 'Kaynakça'
     },
     citations: [
       {
-        term: 'quantum entanglement',
-        replacement: 'quantum entanglement<sup>[1]</sup>'
+        term: 'kuantum dolanıklığı',
+        replacement: 'kuantum dolanıklığı<sup>[1]</sup>'
       }
     ]
   };
 
   try {
     fs.writeFileSync(configPath, JSON.stringify(templateConfig, null, 2), 'utf8');
-    console.log('book.json created.');
+    console.log(Locale.get('initSuccessJson', 'tr'));
 
     const assetsDir = path.join(currentDir, 'assets');
     const section0Dir = path.join(assetsDir, 'section-0');
@@ -275,31 +277,30 @@ function handleInit(): void {
 
     fs.writeFileSync(
       path.join(section0Dir, '0.1.md'),
-      `# Introduction and Preface\n\nThis book was created using Bitig. This is the preface or introduction section.`,
+      `# Giriş ve Önsöz\n\nBu kitap Bitig kullanılarak oluşturulmuştur. Bu giriş veya önsöz bölümüdür.`,
       'utf8'
     );
     fs.writeFileSync(
       path.join(section1Dir, '1.1.md'),
-      `# Foundations and the World\n\nQuantum entanglement is one of the deepest secrets of the universe. This is the first chapter.`,
+      `# Temeller ve Dünya\n\nKuantum dolanıklığı evrenin en derin sırlarından biridir. Bu ilk bölümdür.`,
       'utf8'
     );
     fs.writeFileSync(
       path.join(assetsDir, 'epilogue.md'),
-      `# Epilogue\n\nThis book concludes with the epilogue.`,
+      `# Son Söz\n\nBu kitap son söz ile bitmektedir.`,
       'utf8'
     );
     fs.writeFileSync(
       path.join(assetsDir, 'bibliography.md'),
-      `# Bibliography\n\n[1] Penrose, R. (1989). The Emperor's New Mind.`,
+      `# Kaynakça\n\n[1] Penrose, R. (1989). The Emperor's New Mind.`,
       'utf8'
     );
 
-    console.log('Sample chapter directories and markdown files (assets/) created.');
-    console.log('\nSuccess! To compile the book, run:');
-    console.log('  bitig build');
+    console.log(Locale.get('initSuccessChapters', 'tr'));
+    console.log(Locale.get('initSuccessRun', 'tr'));
   } catch (error) {
     const err = error as Error;
-    console.error('Error: An error occurred while creating the template:', err.message);
+    console.error(Locale.get('initError', 'tr'), err.message);
     process.exit(1);
   }
 }
@@ -309,8 +310,9 @@ function handleInit(): void {
  * @param cliArgs
  */
 async function handleBuild(cliArgs: CliArgs): Promise<void> {
+  let config: BookConfig | undefined;
   try {
-    const config = loadConfig(cliArgs.config);
+    config = loadConfig(cliArgs.config);
 
     // Apply CLI argument overrides
     if (cliArgs.theme) {
@@ -327,18 +329,20 @@ async function handleBuild(cliArgs: CliArgs): Promise<void> {
     }
 
     const compiler = new BookCompiler(config);
+    const lang = config.language;
 
-    console.log('Loading configuration...');
-    console.log('Scanning source files...');
+    console.log(Locale.get('buildLoadingConfig', lang));
+    console.log(Locale.get('buildScanning', lang));
     compiler.scanAndLoad();
 
-    console.log('Compiling book...');
+    console.log(Locale.get('buildCompiling', lang));
     await compiler.writeOutputs();
 
-    console.log('Book and AI metadata successfully compiled!');
+    console.log(Locale.get('buildSuccess', lang));
   } catch (error) {
     const err = error as Error;
-    console.error('Compilation Failed:', err.message);
+    const lang = config ? config.language : 'tr';
+    console.error(Locale.get('cliErrorCompilationFailed', lang), err.message);
     process.exit(1);
   }
 }
@@ -355,14 +359,15 @@ function handleAddSection(cliArgs: CliArgs): void {
     process.exit(1);
   }
   const title = cliArgs.title || `Section ${sectionNum}`;
-  const config = loadConfig(cliArgs.config);
-  const manager = new BookManager(config, getConfigPath(cliArgs.config));
-
+  let config: BookConfig | undefined;
   try {
+    config = loadConfig(cliArgs.config);
+    const manager = new BookManager(config, getConfigPath(cliArgs.config));
     manager.addSection(sectionNum, title);
   } catch (error) {
     const err = error as Error;
-    console.error('Failed to add section:', err.message);
+    const lang = config ? config.language : 'tr';
+    console.error(Locale.get('cliErrorFailedAddSection', lang), err.message);
     process.exit(1);
   }
 }
@@ -389,14 +394,15 @@ function handleAddChapter(cliArgs: CliArgs): void {
   }
 
   const title = cliArgs.title || `Chapter ${sectionNum}.${chapterNum}`;
-  const config = loadConfig(cliArgs.config);
-  const manager = new BookManager(config, getConfigPath(cliArgs.config));
-
+  let config: BookConfig | undefined;
   try {
+    config = loadConfig(cliArgs.config);
+    const manager = new BookManager(config, getConfigPath(cliArgs.config));
     manager.addChapter(sectionNum, chapterNum, title);
   } catch (error) {
     const err = error as Error;
-    console.error('Failed to add chapter:', err.message);
+    const lang = config ? config.language : 'tr';
+    console.error(Locale.get('cliErrorFailedAddChapter', lang), err.message);
     process.exit(1);
   }
 }
@@ -428,14 +434,15 @@ function handleMoveChapter(cliArgs: CliArgs): void {
     process.exit(1);
   }
 
-  const config = loadConfig(cliArgs.config);
-  const manager = new BookManager(config, getConfigPath(cliArgs.config));
-
+  let config: BookConfig | undefined;
   try {
+    config = loadConfig(cliArgs.config);
+    const manager = new BookManager(config, getConfigPath(cliArgs.config));
     manager.moveChapter(fromSec, fromChap, toSec, toChap);
   } catch (error) {
     const err = error as Error;
-    console.error('Failed to move chapter:', err.message);
+    const lang = config ? config.language : 'tr';
+    console.error(Locale.get('cliErrorFailedMoveChapter', lang), err.message);
     process.exit(1);
   }
 }
@@ -459,14 +466,15 @@ function handleDeleteChapter(cliArgs: CliArgs): void {
     process.exit(1);
   }
 
-  const config = loadConfig(cliArgs.config);
-  const manager = new BookManager(config, getConfigPath(cliArgs.config));
-
+  let config: BookConfig | undefined;
   try {
+    config = loadConfig(cliArgs.config);
+    const manager = new BookManager(config, getConfigPath(cliArgs.config));
     manager.deleteChapter(sectionNum, chapterNum);
   } catch (error) {
     const err = error as Error;
-    console.error('Failed to delete chapter:', err.message);
+    const lang = config ? config.language : 'tr';
+    console.error(Locale.get('cliErrorFailedDeleteChapter', lang), err.message);
     process.exit(1);
   }
 }
@@ -475,8 +483,9 @@ function handleDeleteChapter(cliArgs: CliArgs): void {
  * Displays draft analytics and progress statistics.
  */
 function handleStats(cliArgs: CliArgs): void {
+  let config: BookConfig | undefined;
   try {
-    const config = loadConfig(cliArgs.config);
+    config = loadConfig(cliArgs.config);
     const compiler = new BookCompiler(config);
     compiler.scanAndLoad();
 
@@ -485,36 +494,50 @@ function handleStats(cliArgs: CliArgs): void {
       process.exit(1);
     }
 
+    const lang = config.language;
     const metadata = JSON.parse(compiler.metadataGenerator.generateJSONMetadata());
+
     console.log(`
 ============================================================
-BOOK STATUS REPORT: "${metadata.book.title}"
+${Locale.get('statsReportTitle', lang)}: "${metadata.book.title}"
 ============================================================
-Author:             ${metadata.book.author}
-Subtitle:           ${metadata.book.subtitle || 'N/A'}
-Theme:              ${metadata.book.theme}
+${Locale.get('statsAuthor', lang)}:             ${metadata.book.author}
+${Locale.get('statsSubtitle', lang)}:           ${metadata.book.subtitle || 'N/A'}
+${Locale.get('statsTheme', lang)}:              ${metadata.book.theme}
 
-[Draft Statistics]
-Total Sections:     ${metadata.stats.totalSections}
-Total Chapters:     ${metadata.stats.totalChapters}
-Total Words:        ${metadata.stats.totalWords} words
-Total Characters:   ${metadata.stats.totalCharacters} characters
-Est. Reading Time:  ${metadata.stats.estimatedReadTimeMinutes} minutes
+${Locale.get('statsDraftStats', lang)}
+${Locale.get('statsTotalSections', lang)}:     ${metadata.stats.totalSections}
+${Locale.get('statsTotalChapters', lang)}:     ${metadata.stats.totalChapters}
+${Locale.get('statsTotalWords', lang)}:        ${metadata.stats.totalWords}
+${Locale.get('statsTotalChars', lang)}:   ${metadata.stats.totalCharacters}
+${Locale.get('statsEstReadingTime', lang, { time: metadata.stats.estimatedReadTimeMinutes })}
 
-[Structure Breakdown]`);
+${Locale.get('statsStructureBreakdown', lang)}`);
 
     metadata.structure.forEach((sec: any) => {
-      console.log(`\nSection ${sec.sectionNum}: "${sec.title}" (${sec.chaptersCount} chapters)`);
+      console.log(
+        Locale.get('statsSectionLabel', lang, {
+          num: sec.sectionNum,
+          title: sec.title,
+          count: sec.chaptersCount
+        })
+      );
       sec.chapters.forEach((chap: any) => {
         console.log(
-          `  - Chapter ${sec.sectionNum}.${chap.chapterNum} "${chap.title}" (${chap.wordCount} words)`
+          Locale.get('statsChapterLabel', lang, {
+            sec: sec.sectionNum,
+            chap: chap.chapterNum,
+            title: chap.title,
+            words: chap.wordCount
+          })
         );
       });
     });
     console.log('\n============================================================');
   } catch (error) {
     const err = error as Error;
-    console.error('Failed to load statistics:', err.message);
+    const lang = config ? config.language : 'tr';
+    console.error(Locale.get('cliErrorFailedLoadStats', lang), err.message);
     process.exit(1);
   }
 }
@@ -523,16 +546,18 @@ Est. Reading Time:  ${metadata.stats.estimatedReadTimeMinutes} minutes
  * Runs diagnostics checks on the book files.
  */
 function handleCheck(cliArgs: CliArgs): void {
+  let config: BookConfig | undefined;
   try {
-    const config = loadConfig(cliArgs.config);
+    config = loadConfig(cliArgs.config);
     const compiler = new BookCompiler(config);
     const linter = new BookLinter(compiler);
+    const lang = config.language;
 
-    console.log('Running book diagnostics...');
+    console.log(Locale.get('checkRunning', lang));
     const messages = linter.runAllChecks();
 
     if (messages.length === 0) {
-      console.log('No diagnostics issues found! Book is clean and AI-ready.');
+      console.log(Locale.get('checkClean', lang));
       return;
     }
 
@@ -548,13 +573,14 @@ function handleCheck(cliArgs: CliArgs): void {
       console.log(`${badge} ${msg.file}${lineInfo} - ${msg.message}`);
     });
 
-    console.log(`\nDiagnostics finished: ${errors} errors, ${warnings} warnings found.`);
+    console.log(Locale.get('checkFinished', lang, { errors, warnings }));
     if (errors > 0) {
       process.exit(1);
     }
   } catch (error) {
     const err = error as Error;
-    console.error('Diagnostics failed to run:', err.message);
+    const lang = config ? config.language : 'tr';
+    console.error(Locale.get('cliErrorFailedRunCheck', lang), err.message);
     process.exit(1);
   }
 }
@@ -578,17 +604,19 @@ function handleContext(cliArgs: CliArgs): void {
     process.exit(1);
   }
 
+  let config: BookConfig | undefined;
   try {
-    const config = loadConfig(cliArgs.config);
+    config = loadConfig(cliArgs.config);
     const compiler = new BookCompiler(config);
     const packager = new ContextPackager(compiler);
 
-    console.log(`Packaging AI context for chapter ${sectionNum}.${chapterNum}...`);
+    console.log(Locale.get('buildScanning', config.language));
     const pack = packager.packageContextFor(sectionNum, chapterNum);
     console.log('\n' + pack);
   } catch (error) {
     const err = error as Error;
-    console.error('Failed to package context:', err.message);
+    const lang = config ? config.language : 'tr';
+    console.error(Locale.get('cliErrorFailedPackageContext', lang), err.message);
     process.exit(1);
   }
 }
@@ -605,27 +633,30 @@ function handleSearch(cliArgs: CliArgs): void {
     process.exit(1);
   }
 
+  let config: BookConfig | undefined;
   try {
-    const config = loadConfig(cliArgs.config);
+    config = loadConfig(cliArgs.config);
     const compiler = new BookCompiler(config);
     const searcher = new BookSearcher(compiler);
+    const lang = config.language;
 
-    console.log(`Searching for "${query}"...`);
+    console.log(Locale.get('searchRunning', lang, { query }));
     const results = searcher.search(query);
 
     if (results.length === 0) {
-      console.log('No matches found.');
+      console.log(Locale.get('searchNoMatches', lang));
       return;
     }
 
-    console.log(`Found ${results.length} match(es):`);
+    console.log(Locale.get('searchFoundMatches', lang, { count: results.length }));
     results.forEach((res) => {
       console.log(`\n${res.file}:${res.lineNumber} [${res.chapterTitle}]`);
       console.log(`   > ${res.lineContent}`);
     });
   } catch (error) {
     const err = error as Error;
-    console.error('Search failed:', err.message);
+    const lang = config ? config.language : 'tr';
+    console.error(Locale.get('cliErrorFailedSearch', lang), err.message);
     process.exit(1);
   }
 }

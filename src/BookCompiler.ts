@@ -11,6 +11,7 @@ import { StyleManager } from './StyleManager';
 import { AgentMetadataGenerator } from './AgentMetadataGenerator';
 import { PdfCompiler } from './PdfCompiler';
 import { SpecialFiles } from './types';
+import { Locale } from './Locale';
 
 export class BookCompiler {
   public config: BookConfig;
@@ -118,7 +119,7 @@ export class BookCompiler {
     this.sections.forEach((section) => section.sortChapters());
 
     // 3. Generate Table of Contents
-    const tocHtml = TOCGenerator.generateHTML(this.sections);
+    const tocHtml = TOCGenerator.generateHTML(this.sections, this.config.language);
 
     // 4. Assemble contents
     let markdownContent = '';
@@ -169,7 +170,7 @@ export class BookCompiler {
     const bodyHtml = marked.parse(markdownContent) as string;
 
     const fullHtml = `<!DOCTYPE html>
-<html lang="en">
+<html lang="${this.config.language}">
 <head>
   <meta charset="UTF-8">
   <title>${this.config.title}</title>
@@ -234,10 +235,11 @@ export class BookCompiler {
       );
       const pdfCompiler = new PdfCompiler();
 
-      console.log(`Generating PDF output: ${pdfOutputPath}...`);
+      const msg = Locale.get('buildGeneratingPdf', this.config.language, { path: pdfOutputPath });
+      console.log(msg);
       await pdfCompiler.compileToPdf(html, pdfOutputPath);
     } else {
-      console.log('PDF generation skipped (disabled in configuration).');
+      console.log(Locale.get('buildPdfSkip', this.config.language));
     }
   }
 

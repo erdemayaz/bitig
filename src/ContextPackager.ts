@@ -1,5 +1,6 @@
 import { BookCompiler } from './BookCompiler';
 import { Chapter } from './Chapter';
+import { Locale } from './Locale';
 
 export class ContextPackager {
   public compiler: BookCompiler;
@@ -19,6 +20,8 @@ export class ContextPackager {
   public packageContextFor(sectionNum: number, chapterNum: number): string {
     // Ensure files are loaded
     this.compiler.scanAndLoad();
+
+    const lang = this.compiler.config.language;
 
     // Sort all sections and chapters
     this.compiler.sections.sort((a, b) => a.sectionNum - b.sectionNum);
@@ -41,18 +44,27 @@ export class ContextPackager {
 
     // Generate synopses of all chapters
     const metadataGen = this.compiler.metadataGenerator;
-    let synopsesText = 'No synopses available.';
+    let synopsesText = Locale.get('contextStructureNoSynopsis', lang);
     if (metadataGen) {
       const metadata = JSON.parse(metadataGen.generateJSONMetadata());
       const synopsisLines: string[] = [];
 
       metadata.structure.forEach((sec: any) => {
-        synopsisLines.push(`### Section ${sec.sectionNum}: ${sec.title}`);
+        synopsisLines.push(
+          Locale.get('contextStructureSection', lang, { sec: sec.sectionNum, title: sec.title })
+        );
         sec.chapters.forEach((chap: any) => {
           const isTarget = chap.chapterNum === chapterNum && sec.sectionNum === sectionNum;
           const marker = isTarget ? ' 🌟 [TARGET CHAPTER]' : '';
+          const synopsis = chap.synopsis || Locale.get('contextStructureNoContent', lang);
           synopsisLines.push(
-            `  - Chapter ${sec.sectionNum}.${chap.chapterNum} "${chap.title}": ${chap.synopsis || 'No content yet.'}${marker}`
+            Locale.get('contextStructureChapter', lang, {
+              sec: sec.sectionNum,
+              chap: chap.chapterNum,
+              title: chap.title,
+              synopsis,
+              marker
+            })
           );
         });
       });
@@ -63,71 +75,87 @@ export class ContextPackager {
     const citations = this.compiler.config.citations;
     const styleTheme = this.compiler.config.theme;
 
+    const metadataHeader = Locale.get('contextMetadataHeader', lang);
+    const structureHeader = Locale.get('contextStructureHeader', lang);
+    const guidelinesHeader = Locale.get('contextGuidelinesHeader', lang);
+    const precedingHeader = Locale.get('contextPrecedingHeader', lang);
+    const targetHeader = Locale.get('contextTargetHeader', lang);
+    const instructionsHeader = Locale.get('contextInstructionsHeader', lang);
+
+    const bookTitleLabel = Locale.get('contextBookTitle', lang);
+    const bookSubtitleLabel = Locale.get('contextBookSubtitle', lang);
+    const bookAuthorLabel = Locale.get('contextBookAuthor', lang);
+    const bookDescLabel = Locale.get('contextBookDescription', lang);
+    const bookThemeLabel = Locale.get('contextBookTheme', lang);
+
+    let citationsText = Locale.get('contextGuidelinesNoCitations', lang);
+    if (citations.length > 0) {
+      citationsText = citations
+        .map((c) =>
+          Locale.get('contextGuidelinesRule', lang, { term: c.term, replacement: c.replacement })
+        )
+        .join('\n');
+    }
+
+    let precedingText = Locale.get('contextPrecedingNone', lang);
+    if (prevChapter) {
+      const intro = Locale.get('contextPrecedingIntro', lang, {
+        sec: prevChapter.sectionNum,
+        chap: prevChapter.chapterNum,
+        title: prevChapter.title
+      });
+      precedingText = `${intro}\n\n\`\`\`markdown\n${prevChapter.rawContent}\n\`\`\``;
+    }
+
+    let targetText = Locale.get('contextTargetEmpty', lang);
+    if (targetChapter.rawContent.trim() !== '') {
+      const intro = Locale.get('contextTargetIntro', lang);
+      targetText = `${intro}\n\n\`\`\`markdown\n${targetChapter.rawContent}\n\`\`\``;
+    }
+
     const context = `
-# BOOK WRITING CONTEXT PACK
+${Locale.get('contextTitle', lang)}
 =========================
-This pack is compiled specifically for writing or refining:
-👉 **Section ${sectionNum}, Chapter ${chapterNum}**: "${targetChapter.title}"
+${Locale.get('contextIntro', lang)}
+${Locale.get('contextTargetChapter', lang, { sec: sectionNum, chap: chapterNum, title: targetChapter.title })}
 
 ---
 
-## 1. GENERAL BOOK METADATA
-- **Title**: ${this.compiler.config.title}
-- **Subtitle**: ${this.compiler.config.subtitle || 'N/A'}
-- **Author**: ${this.compiler.config.author}
-- **Description**: ${this.compiler.config.description || 'N/A'}
-- **Theme**: ${styleTheme}
+${metadataHeader}
+- **${bookTitleLabel}**: ${this.compiler.config.title}
+- **${bookSubtitleLabel}**: ${this.compiler.config.subtitle || 'N/A'}
+- **${bookAuthorLabel}**: ${this.compiler.config.author}
+- **${bookDescLabel}**: ${this.compiler.config.description || 'N/A'}
+- **${bookThemeLabel}**: ${styleTheme}
 
 ---
 
-## 2. BOOK STRUCTURE & SYNOPSES
-Here is the outline of the book, including the first paragraph (synopsis) of each chapter:
+${structureHeader}
+${Locale.get('contextStructureIntro', lang)}
 ${synopsesText}
 
 ---
 
-## 3. STYLE GUIDELINES & CITATION RULES
-Apply the following terms automatically. The compiler will map them using superscript formatting:
-${
-  citations.length > 0
-    ? citations.map((c) => `- Term: "${c.term}" -> Citation: "${c.replacement}"`).join('\n')
-    : 'No citations defined.'
-}
+${guidelinesHeader}
+${Locale.get('contextGuidelinesIntro', lang)}
+${citationsText}
 
 ---
 
-## 4. PRECEDING CHAPTER CONTENT (For Narrative Flow)
-${
-  prevChapter
-    ? `Here is the full text of the preceding chapter (Chapter ${prevChapter.sectionNum}.${prevChapter.chapterNum} "${prevChapter.title}") to maintain narrative flow and character consistency:
-
-\`\`\`markdown
-${prevChapter.rawContent}
-\`\`\`
-`
-    : 'This is the first chapter of the book. No preceding chapter exists.'
-}
+${precedingHeader}
+${precedingText}
 
 ---
 
-## 5. TARGET CHAPTER CURRENT CONTENT (To edit or continue)
-${
-  targetChapter.rawContent.trim() !== ''
-    ? `Here is the current content of the target chapter. Expand, edit, or rewrite this:
-
-\`\`\`markdown
-${targetChapter.rawContent}
-\`\`\`
-`
-    : 'The target chapter is currently empty.'
-}
+${targetHeader}
+${targetText}
 
 =========================
-[INSTRUCTIONS FOR AI AGENT]
-- Maintain the style, vocabulary, and tone of the preceding chapter.
-- Do not repeat information already covered in the synopses.
-- Integrate the citation terms naturally.
-- Output ONLY valid markdown text.
+[${instructionsHeader}]
+${Locale.get('contextInstruction1', lang)}
+${Locale.get('contextInstruction2', lang)}
+${Locale.get('contextInstruction3', lang)}
+${Locale.get('contextInstruction4', lang)}
 `;
 
     return context.trim();

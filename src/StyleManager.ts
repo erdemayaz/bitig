@@ -112,6 +112,15 @@ export class StyleManager {
   @page cover-page-layout {
     margin-top: 0;
     margin-bottom: 0;
+    @bottom-center {
+      content: none;
+    }
+  }
+
+  @page toc-page-layout {
+    @bottom-center {
+      content: none;
+    }
   }
   
   body {
@@ -163,8 +172,7 @@ export class StyleManager {
   .cover-page {
     page: cover-page-layout;
     text-align: center;
-    padding-top: 6cm !important;
-    padding-bottom: 6cm !important;
+    padding: 2cm !important;
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -249,6 +257,7 @@ export class StyleManager {
   }
   
   .toc-page {
+    page: toc-page-layout;
     page-break-before: always;
     break-before: page;
     padding-top: 2cm;
@@ -335,6 +344,15 @@ export class StyleManager {
   @page cover-page-layout {
     margin-top: 0;
     margin-bottom: 0;
+    @bottom-center {
+      content: none;
+    }
+  }
+
+  @page toc-page-layout {
+    @bottom-center {
+      content: none;
+    }
   }
   
   body {
@@ -386,8 +404,7 @@ export class StyleManager {
   .cover-page {
     page: cover-page-layout;
     text-align: center;
-    padding-top: 6cm !important;
-    padding-bottom: 6cm !important;
+    padding: 2cm !important;
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -471,6 +488,7 @@ export class StyleManager {
   }
   
   .toc-page {
+    page: toc-page-layout;
     page-break-before: always;
     break-before: page;
     padding-top: 2cm;
@@ -557,6 +575,15 @@ export class StyleManager {
   @page cover-page-layout {
     margin-top: 0;
     margin-bottom: 0;
+    @bottom-center {
+      content: none;
+    }
+  }
+
+  @page toc-page-layout {
+    @bottom-center {
+      content: none;
+    }
   }
   
   body {
@@ -610,8 +637,7 @@ export class StyleManager {
   .cover-page {
     page: cover-page-layout;
     text-align: center;
-    padding-top: 7cm !important;
-    padding-bottom: 7cm !important;
+    padding: 2cm !important;
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -698,6 +724,7 @@ export class StyleManager {
   }
   
   .toc-page {
+    page: toc-page-layout;
     page-break-before: always;
     break-before: page;
     padding-top: 2cm;

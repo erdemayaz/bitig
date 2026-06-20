@@ -1,17 +1,20 @@
 import { Section } from './Section';
 import { TextProcessor } from './TextProcessor';
+import { Locale } from './Locale';
 
 export class TOCGenerator {
   /**
    * Generates a beautifully formatted HTML Table of Contents.
    * Compatible with print stylesheets and PDF layouts.
    * @param sections
+   * @param language
    * @returns string
    */
-  public static generateHTML(sections: Section[]): string {
+  public static generateHTML(sections: Section[], language: string = 'tr'): string {
     if (!Array.isArray(sections) || sections.length === 0) return '';
 
-    let tocHtml = `\n\n<div class="toc-page">\n  <h1 class="toc-heading">TABLE OF CONTENTS</h1>\n  <div class="toc-container">\n`;
+    const heading = Locale.get('tocHtmlHeading', language);
+    let tocHtml = `\n\n<div class="toc-page">\n  <h1 class="toc-heading">${heading}</h1>\n  <div class="toc-container">\n`;
 
     sections.forEach((section) => {
       // 998: Epilogue, 999: Bibliography
@@ -48,12 +51,14 @@ export class TOCGenerator {
   /**
    * Generates a standard Markdown Table of Contents.
    * @param sections
+   * @param language
    * @returns string
    */
-  public static generateMarkdown(sections: Section[]): string {
+  public static generateMarkdown(sections: Section[], language: string = 'tr'): string {
     if (!Array.isArray(sections) || sections.length === 0) return '';
 
-    let tocMd = `# Table of Contents\n\n`;
+    const heading = Locale.get('tocMdHeading', language);
+    let tocMd = heading;
 
     sections.forEach((section) => {
       const isSpecialSection = section.sectionNum >= 998;

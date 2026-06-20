@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { BookConfig } from './BookConfig';
 import { BookConfigData } from './types';
+import { Locale } from './Locale';
 
 export class BookManager {
   public config: BookConfig;
@@ -31,7 +32,7 @@ export class BookManager {
     rawData.sectionTitles[String(sectionNum)] = title;
     this._writeRawConfig(rawData);
 
-    console.log(`Section ${sectionNum} directory created and titled "${title}" in configuration.`);
+    console.log(Locale.get('managerSectionCreated', this.config.language, { sectionNum, title }));
   }
 
   /**
@@ -64,10 +65,14 @@ export class BookManager {
       throw new Error(`Chapter file already exists at: ${filePath}`);
     }
 
-    const templateContent = `# ${title}\n\nThis is chapter ${sectionNum}.${chapterNum} titled "${title}". Fill in the content.\n`;
+    const templateContent = Locale.get('managerChapterTemplate', this.config.language, {
+      title,
+      sectionNum,
+      chapterNum
+    });
     fs.writeFileSync(filePath, templateContent, 'utf8');
 
-    console.log(`Chapter created at: ${filePath}`);
+    console.log(Locale.get('managerChapterCreated', this.config.language, { filePath }));
   }
 
   /**
@@ -98,7 +103,7 @@ export class BookManager {
     }
 
     fs.renameSync(fromPath, toPath);
-    console.log(`Moved chapter from ${fromPath} to ${toPath}`);
+    console.log(Locale.get('managerChapterMoved', this.config.language, { fromPath, toPath }));
   }
 
   /**
@@ -115,7 +120,7 @@ export class BookManager {
     }
 
     fs.unlinkSync(filePath);
-    console.log(`Chapter deleted: ${filePath}`);
+    console.log(Locale.get('managerChapterDeleted', this.config.language, { filePath }));
   }
 
   /**

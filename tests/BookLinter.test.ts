@@ -28,6 +28,7 @@ describe('BookLinter', () => {
       title: 'Lint Book',
       assetsDir: './assets',
       distDir: './dist',
+      language: 'en',
       citations: [
         {
           term: 'apple term',
