@@ -62,23 +62,27 @@ export class AgentMetadataGenerator {
         totalChars += charCount;
         totalChapters += 1;
 
-        const paragraphs = chapter.rawContent
-          .split('\n')
-          .map((p) => p.trim())
-          .filter(
-            (p) =>
-              p &&
-              !p.startsWith('#') &&
-              !p.startsWith('```') &&
-              !p.startsWith('>') &&
-              !p.startsWith('-') &&
-              !p.startsWith('*')
-          );
+        let synopsis =
+          this.bookConfig.rawConfig.synopses?.[`${section.sectionNum}.${chapter.chapterNum}`];
+        if (!synopsis) {
+          const paragraphs = chapter.rawContent
+            .split('\n')
+            .map((p) => p.trim())
+            .filter(
+              (p) =>
+                p &&
+                !p.startsWith('#') &&
+                !p.startsWith('```') &&
+                !p.startsWith('>') &&
+                !p.startsWith('-') &&
+                !p.startsWith('*')
+            );
 
-        const synopsis =
-          paragraphs.length > 0
-            ? paragraphs[0].slice(0, 250) + (paragraphs[0].length > 250 ? '...' : '')
-            : '';
+          synopsis =
+            paragraphs.length > 0
+              ? paragraphs[0].slice(0, 250) + (paragraphs[0].length > 250 ? '...' : '')
+              : '';
+        }
 
         return {
           chapterNum: chapter.chapterNum,

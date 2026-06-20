@@ -215,4 +215,119 @@ describe('BookManager', () => {
       expect(() => manager.deleteChapter(1, 1)).toThrow('Chapter file not found');
     });
   });
+
+  describe('updateChapterMetadata', () => {
+    it('should update synopsis in book.json', () => {
+      (fs.readFileSync as jest.Mock).mockReturnValue(JSON.stringify({ title: 'Manager Book' }));
+
+      manager.updateChapterMetadata(1, 2, { synopsis: 'Test Synopsis' });
+
+      expect(fs.writeFileSync).toHaveBeenCalledWith(
+        expect.stringContaining('book.json'),
+        expect.stringContaining('"1.2": "Test Synopsis"'),
+        'utf8'
+      );
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('1.2'));
+    });
+
+    it('should update H1 title in chapter markdown file if exists', () => {
+      (fs.existsSync as jest.Mock).mockReturnValue(true);
+      (fs.readFileSync as jest.Mock).mockReturnValue('# Old Title\nSome content.');
+
+      manager.updateChapterMetadata(1, 1, { title: 'New Title' });
+
+      expect(fs.writeFileSync).toHaveBeenCalledWith(
+        expect.stringContaining('1.1.md'),
+        '# New Title\nSome content.',
+        'utf8'
+      );
+    });
+
+    it('should prepend H1 title in chapter markdown file if H1 does not exist', () => {
+      (fs.existsSync as jest.Mock).mockReturnValue(true);
+      (fs.readFileSync as jest.Mock).mockReturnValue('Some content.');
+
+      manager.updateChapterMetadata(1, 1, { title: 'New Title' });
+
+      expect(fs.writeFileSync).toHaveBeenCalledWith(
+        expect.stringContaining('1.1.md'),
+        '# New Title\n\nSome content.',
+        'utf8'
+      );
+    });
+
+    it('should update title for special chapter epilogue (998)', () => {
+      (fs.existsSync as jest.Mock).mockReturnValue(true);
+      (fs.readFileSync as jest.Mock).mockReturnValue('# Old Epilogue\nSome content.');
+
+      manager.updateChapterMetadata(998, 1, { title: 'New Epilogue' });
+
+      expect(fs.writeFileSync).toHaveBeenCalledWith(
+        expect.stringContaining('my-epilogue.md'),
+        '# New Epilogue\nSome content.',
+        'utf8'
+      );
+    });
+
+    it('should update title for special chapter bibliography (999)', () => {
+      (fs.existsSync as jest.Mock).mockReturnValue(true);
+      (fs.readFileSync as jest.Mock).mockReturnValue('# Old Bib\nSome content.');
+
+      manager.updateChapterMetadata(999, 1, { title: 'New Bib' });
+
+      expect(fs.writeFileSync).toHaveBeenCalledWith(
+        expect.stringContaining('my-bibliography.md'),
+        '# New Bib\nSome content.',
+        'utf8'
+      );
+    });
+
+    it('should update title for special chapter epilogue (998) fallback name', () => {
+      (fs.existsSync as jest.Mock).mockReturnValue(true);
+      (fs.readFileSync as jest.Mock).mockReturnValue('# Old Epilogue\nSome content.');
+
+      const simpleConfig = new BookConfig({
+        title: 'Simple',
+        assetsDir: './assets',
+        distDir: './dist'
+      });
+      const simpleManager = new BookManager(simpleConfig, './book.json');
+
+      simpleManager.updateChapterMetadata(998, 1, { title: 'New Epilogue' });
+
+      expect(fs.writeFileSync).toHaveBeenCalledWith(
+        expect.stringContaining('epilogue.md'),
+        '# New Epilogue\nSome content.',
+        'utf8'
+      );
+    });
+
+    it('should update title for special chapter bibliography (999) fallback name', () => {
+      (fs.existsSync as jest.Mock).mockReturnValue(true);
+      (fs.readFileSync as jest.Mock).mockReturnValue('# Old Bib\nSome content.');
+
+      const simpleConfig = new BookConfig({
+        title: 'Simple',
+        assetsDir: './assets',
+        distDir: './dist'
+      });
+      const simpleManager = new BookManager(simpleConfig, './book.json');
+
+      simpleManager.updateChapterMetadata(999, 1, { title: 'New Bib' });
+
+      expect(fs.writeFileSync).toHaveBeenCalledWith(
+        expect.stringContaining('bibliography.md'),
+        '# New Bib\nSome content.',
+        'utf8'
+      );
+    });
+
+    it('should throw error when updating title for non-existent chapter file', () => {
+      (fs.existsSync as jest.Mock).mockReturnValue(false);
+
+      expect(() => manager.updateChapterMetadata(1, 1, { title: 'New Title' })).toThrow(
+        'Chapter file not found:'
+      );
+    });
+  });
 });

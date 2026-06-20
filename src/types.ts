@@ -28,6 +28,7 @@ export interface BookConfigData {
   pdf?: boolean;
   language?: string;
   citations?: CitationRule[];
+  synopses?: Record<string, string>;
 }
 
 export interface SpecialFiles {

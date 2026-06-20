@@ -124,6 +124,71 @@ export class BookManager {
   }
 
   /**
+   * Updates chapter metadata such as synopsis and title programmatically.
+   * @param sectionNum
+   * @param chapterNum
+   * @param options
+   */
+  public updateChapterMetadata(
+    sectionNum: number,
+    chapterNum: number,
+    options: { title?: string; synopsis?: string }
+  ): void {
+    if (options.synopsis !== undefined) {
+      const rawData = this._readRawConfig();
+      if (!rawData.synopses) {
+        rawData.synopses = {};
+      }
+      rawData.synopses[`${sectionNum}.${chapterNum}`] = options.synopsis;
+      this._writeRawConfig(rawData);
+      console.log(
+        Locale.get('managerSynopsisUpdated', this.config.language, {
+          coords: `${sectionNum}.${chapterNum}`
+        })
+      );
+    }
+
+    if (options.title !== undefined) {
+      const isSpecial = sectionNum >= 998;
+      let filename = '';
+      let targetDir = this.config.assetsDir;
+
+      if (isSpecial) {
+        filename =
+          sectionNum === 998
+            ? this.config.rawConfig.epilogueFile || 'epilogue.md'
+            : this.config.rawConfig.bibliographyFile || 'bibliography.md';
+      } else {
+        targetDir = path.join(this.config.assetsDir, `section-${sectionNum}`);
+        filename = `${sectionNum}.${chapterNum}.md`;
+      }
+
+      const filePath = path.join(targetDir, filename);
+      if (!fs.existsSync(filePath)) {
+        throw new Error(`Chapter file not found: ${filePath}`);
+      }
+
+      let content = fs.readFileSync(filePath, 'utf8');
+      const lines = content.split('\n');
+
+      if (lines.length > 0 && lines[0].startsWith('# ')) {
+        lines[0] = `# ${options.title}`;
+        content = lines.join('\n');
+      } else {
+        content = `# ${options.title}\n\n` + content;
+      }
+
+      fs.writeFileSync(filePath, content, 'utf8');
+      console.log(
+        Locale.get('managerTitleUpdated', this.config.language, {
+          filePath,
+          title: options.title
+        })
+      );
+    }
+  }
+
+  /**
    * Helper to load JSON config data.
    */
   private _readRawConfig(): BookConfigData {
@@ -138,4 +203,5 @@ export class BookManager {
     fs.writeFileSync(this.configPath, JSON.stringify(data, null, 2), 'utf8');
   }
 }
+
 export default BookManager;

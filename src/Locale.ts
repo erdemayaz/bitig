@@ -50,6 +50,13 @@ export class Locale {
       managerChapterCreated: 'Bölüm şurada oluşturuldu: {filePath}',
       managerChapterMoved: 'Bölüm {fromPath} konumundan {toPath} konumuna taşındı',
       managerChapterDeleted: 'Bölüm silindi: {filePath}',
+      managerSynopsisUpdated: '✔ {coords} bölümünün özeti güncellendi.',
+      managerTitleUpdated: '✔ {filePath} dosyasındaki başlık "{title}" olarak güncellendi.',
+      devServerStarting: 'Geliştirme sunucusu başlatılıyor...',
+      devServerCompiling: 'Değişiklik algılandı. Yeniden derleniyor...',
+      devServerReady:
+        'Önizleme sunucusu hazır. Tarayıcınızda http://localhost:{port}/ adresini açın.',
+      cliErrorFailedStartDevServer: 'Geliştirme sunucusu başlatılamadı:',
       managerChapterTemplate:
         '# {title}\n\nBu bölüm {sectionNum}.{chapterNum} başlığı "{title}". İçeriği buraya yazın.\n',
       initSuccessJson: 'book.json oluşturuldu.',
@@ -153,6 +160,12 @@ export class Locale {
       managerChapterCreated: '✔ Chapter created at: {filePath}',
       managerChapterMoved: '✔ Moved chapter from {fromPath} to {toPath}',
       managerChapterDeleted: '✔ Chapter deleted: {filePath}',
+      managerSynopsisUpdated: '✔ Synopsis for chapter {coords} has been updated.',
+      managerTitleUpdated: '✔ Title in {filePath} has been updated to "{title}".',
+      devServerStarting: 'Starting development server...',
+      devServerCompiling: 'Change detected. Recompiling...',
+      devServerReady: 'Preview server ready. Open http://localhost:{port}/ in your browser.',
+      cliErrorFailedStartDevServer: 'Failed to start development server:',
       managerChapterTemplate:
         '# {title}\n\nThis is chapter {sectionNum}.{chapterNum} titled "{title}". Fill in the content.\n',
       initSuccessJson: 'book.json created.',

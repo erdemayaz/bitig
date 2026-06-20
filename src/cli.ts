@@ -10,6 +10,7 @@ import { BookLinter } from './BookLinter';
 import { ContextPackager } from './ContextPackager';
 import { BookSearcher } from './BookSearcher';
 import { Locale } from './Locale';
+import { DevServer } from './DevServer';
 
 interface CliArgs {
   command?: string;
@@ -22,6 +23,8 @@ interface CliArgs {
   positionals: string[];
   title?: string;
   target?: string;
+  synopsis?: string;
+  port?: number;
 }
 
 const args = process.argv.slice(2);
@@ -71,6 +74,13 @@ switch (command) {
     break;
   case 'search':
     handleSearch(cliArgs);
+    break;
+  case 'dev':
+  case 'serve':
+    handleDev(cliArgs);
+    break;
+  case 'update:metadata':
+    handleUpdateMetadata(cliArgs);
     break;
   case 'guide':
     handleGuide();
@@ -148,6 +158,25 @@ function parseArgs(args: string[]): CliArgs {
         console.error('Error: Option --target requires a value.');
         process.exit(1);
       }
+    } else if (arg === '--synopsis') {
+      if (i + 1 < args.length) {
+        result.synopsis = args[++i];
+      } else {
+        console.error('Error: Option --synopsis requires a value.');
+        process.exit(1);
+      }
+    } else if (arg === '-p' || arg === '--port') {
+      if (i + 1 < args.length) {
+        const pVal = parseInt(args[++i], 10);
+        if (isNaN(pVal)) {
+          console.error('Error: Option --port requires a valid number.');
+          process.exit(1);
+        }
+        result.port = pVal;
+      } else {
+        console.error('Error: Option --port requires a value.');
+        process.exit(1);
+      }
     } else if (arg === '--no-pdf') {
       result.pdf = false;
     } else if (arg === '--pdf') {
@@ -173,6 +202,8 @@ Usage:
 Commands:
   init                           Initializes a template book project in the current directory.
   build                          Compiles the book according to the configuration.
+  dev / serve                    Starts a local preview server with hot-reloading on port 3000.
+  update:metadata <sec>.<chap>   Programmatically updates chapter synopsis and/or H1 title.
   add:section <secNum>           Creates a new section folder and updates book.json.
   add:chapter <secNum>.<chapNum> Creates a template markdown file for the chapter.
   move:chapter <from> <to>       Moves and renames a chapter (e.g., bitig move:chapter 1.1 1.2).
@@ -195,11 +226,19 @@ Build Options:
   --pdf                          Enable PDF compilation (default).
   --no-pdf                       Disable PDF compilation.
 
+Dev Options:
+  -p, --port <number>            Port for the local development preview server (default: 3000).
+
 Add Options:
   --title "<title>"              Set a custom title for the section or chapter.
 
+Metadata Options:
+  --synopsis "<text>"            Set synopsis/summary text for the chapter.
+  --title "<title>"              Set a new H1 title for the chapter.
+
 Context Options:
   --target <sec>.<chap>          Alternative way to specify target chapter for context command.
+
 `);
 }
 
@@ -723,7 +762,90 @@ Welcome to Bitig! This guide details the workflow steps to write, refine, and co
      - <bookName>.pdf: Print-ready A4 PDF with covers and page-number aligned TOC (requires Puppeteer).
      - book-metadata.json: Comprehensive structural metadata and chapter summaries for AI search/indexing.
 
+6. LOCAL PREVIEW
+   Start a local HTTP preview server that watches assets/ and book.json for changes, recompiles, and hot-reloads the browser automatically (PDF compiling is bypassed to keep reload times under 50ms):
+     bitig dev [--port <port>]
+
+7. PROGRAMMATIC METADATA UPDATES
+   Update chapter titles and synopses programmatically:
+     bitig update:metadata <secNum>.<chapNum> [--synopsis "<text>"] [--title "<title>"]
+
 For detailed command options, run:
   bitig --help
 `);
+}
+
+/**
+ * Starts the local development preview server.
+ * @param cliArgs
+ */
+async function handleDev(cliArgs: CliArgs): Promise<void> {
+  let config: BookConfig | undefined;
+  try {
+    config = loadConfig(cliArgs.config);
+    const configPath = getConfigPath(cliArgs.config);
+    const port = cliArgs.port || 3000;
+
+    const devServer = new DevServer(config, configPath, port);
+
+    // Graceful shutdown on termination signals
+    const shutdown = async () => {
+      console.log('\nShutting down dev server...');
+      await devServer.stop();
+      process.exit(0);
+    };
+
+    process.on('SIGINT', shutdown);
+    process.on('SIGTERM', shutdown);
+
+    await devServer.start();
+  } catch (error) {
+    const err = error as Error;
+    const lang = config ? config.language : 'tr';
+    console.error(Locale.get('cliErrorFailedStartDevServer', lang), err.message);
+    process.exit(1);
+  }
+}
+
+/**
+ * Programmatically updates chapter metadata.
+ * @param cliArgs
+ */
+function handleUpdateMetadata(cliArgs: CliArgs): void {
+  const coords = cliArgs.positionals[0];
+  if (!coords) {
+    console.error(
+      'Error: Please specify target chapter coordinates, e.g.: bitig update:metadata 1.1 --synopsis "My Synopsis" --title "My Title"'
+    );
+    process.exit(1);
+  }
+
+  const parts = coords.split('.');
+  const sectionNum = parseInt(parts[0], 10);
+  const chapterNum = parts.length > 1 ? parseInt(parts[1], 10) : 1;
+
+  if (isNaN(sectionNum) || isNaN(chapterNum)) {
+    console.error('Error: Invalid section/chapter coordinates format. Use format X.Y');
+    process.exit(1);
+  }
+
+  if (cliArgs.synopsis === undefined && cliArgs.title === undefined) {
+    console.error('Error: Please specify at least one of --title or --synopsis options to update.');
+    process.exit(1);
+  }
+
+  let config: BookConfig | undefined;
+  try {
+    config = loadConfig(cliArgs.config);
+    const manager = new BookManager(config, getConfigPath(cliArgs.config));
+    manager.updateChapterMetadata(sectionNum, chapterNum, {
+      title: cliArgs.title,
+      synopsis: cliArgs.synopsis
+    });
+  } catch (error) {
+    const err = error as Error;
+    const lang = config ? config.language : 'tr';
+    console.error(`Error: Failed to update metadata: ${err.message}`);
+    process.exit(1);
+  }
 }
