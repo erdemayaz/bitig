@@ -9,6 +9,18 @@ const testDir = path.resolve(__dirname, 'temp-devserver-test');
 describe('DevServer', () => {
   let config: BookConfig;
   const configPath = path.join(testDir, 'book.json');
+  let logSpy: jest.SpyInstance;
+  let warnSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+    warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    logSpy.mockRestore();
+    warnSpy.mockRestore();
+  });
 
   beforeAll(() => {
     if (fs.existsSync(testDir)) {
