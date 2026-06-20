@@ -4,6 +4,33 @@ import * as http from 'http';
 import { DevServer } from '../src/DevServer';
 import { BookConfig } from '../src/BookConfig';
 
+jest.mock('fs', () => {
+  const originalFs = jest.requireActual('fs');
+  const mocked = {
+    ...originalFs,
+    watch: jest.fn((...args: any[]) => originalFs.watch(...args)),
+    readFileSync: jest.fn((...args: any[]) => originalFs.readFileSync(...args))
+  };
+  return {
+    __esModule: true,
+    ...mocked,
+    default: mocked
+  };
+});
+
+jest.mock('http', () => {
+  const originalHttp = jest.requireActual('http');
+  const mocked = {
+    ...originalHttp,
+    createServer: jest.fn((...args: any[]) => originalHttp.createServer(...args))
+  };
+  return {
+    __esModule: true,
+    ...mocked,
+    default: mocked
+  };
+});
+
 const testDir = path.resolve(__dirname, 'temp-devserver-test');
 
 describe('DevServer', () => {
@@ -120,6 +147,13 @@ describe('DevServer', () => {
   });
 
   it('should serve build-version and update it on file modification', async () => {
+    let capturedListener: any = null;
+    (fs.watch as jest.Mock).mockImplementation((p, opts: any, cb?: any) => {
+      const actualCb = typeof opts === 'function' ? opts : cb;
+      capturedListener = actualCb;
+      return { close: () => {} } as any;
+    });
+
     const server = new DevServer(config, configPath, 0);
     await server.start();
     const port = server.getPort();
@@ -132,6 +166,10 @@ describe('DevServer', () => {
       // Modify a file to trigger re-compilation
       const chapterPath = path.join(testDir, 'assets', 'section-1', '1.1.md');
       fs.writeFileSync(chapterPath, '# Intro\n\nWelcome to dev server tests modified.', 'utf8');
+
+      // Trigger watch manually
+      expect(capturedListener).toBeDefined();
+      capturedListener();
 
       // Wait for debounce and compile
       await new Promise((resolve) => setTimeout(resolve, 250));
@@ -215,5 +253,126 @@ describe('DevServer', () => {
 
     await server1.stop();
     await server2.stop();
+  });
+
+  it('should handle bad URI encoding gracefully', async () => {
+    const server = new DevServer(config, configPath, 0);
+    await server.start();
+    const port = server.getPort();
+    try {
+      const response = await getRawPath(port, '/%invalid%');
+      expect(response.status).toBe(400);
+    } finally {
+      await server.stop();
+    }
+  });
+
+  it('should handle missing book HTML file gracefully', async () => {
+    const server = new DevServer(config, configPath, 0);
+    await server.start();
+    const port = server.getPort();
+    try {
+      const htmlFilename = config.outputFilename.replace(/\.md$/, '.html');
+      const htmlPath = path.join(config.distDir, htmlFilename);
+      const backupHtmlPath = htmlPath + '.backup';
+      if (fs.existsSync(htmlPath)) {
+        fs.renameSync(htmlPath, backupHtmlPath);
+      }
+
+      const response = await getUrl(port, '/');
+      expect(response.status).toBe(404);
+
+      if (fs.existsSync(backupHtmlPath)) {
+        fs.renameSync(backupHtmlPath, htmlPath);
+      }
+    } finally {
+      await server.stop();
+    }
+  });
+
+  it('should handle book HTML file read error gracefully', async () => {
+    const server = new DevServer(config, configPath, 0);
+    await server.start();
+    const port = server.getPort();
+    try {
+      const htmlFilename = config.outputFilename.replace(/\.md$/, '.html');
+
+      (fs.readFileSync as jest.Mock).mockImplementationOnce((p: any, opts?: any) => {
+        if (typeof p === 'string' && p.endsWith(htmlFilename)) {
+          throw new Error('Read error');
+        }
+        return jest.requireActual('fs').readFileSync(p, opts);
+      });
+
+      const response = await getUrl(port, '/');
+      expect(response.status).toBe(500);
+    } finally {
+      await server.stop();
+    }
+  });
+
+  it('should support watch fallback when recursive watch throws', async () => {
+    (fs.watch as jest.Mock).mockImplementationOnce((p, options, cb) => {
+      if (options && typeof options === 'object' && 'recursive' in options && options.recursive) {
+        throw new Error('Not supported');
+      }
+      return { close: () => {} } as any;
+    });
+
+    const server = new DevServer(config, configPath, 0);
+    await server.start();
+    await server.stop();
+  });
+
+  it('should log compilation errors on file changes', async () => {
+    const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const server = new DevServer(config, configPath, 0);
+    await server.start();
+
+    const spyCompile = jest
+      .spyOn(server as any, 'compileBook')
+      .mockRejectedValueOnce(new Error('Compilation failed.'));
+
+    let capturedListener: any = null;
+    (fs.watch as jest.Mock).mockImplementationOnce((p, opts: any, cb?: any) => {
+      const actualCb = typeof opts === 'function' ? opts : cb;
+      capturedListener = actualCb;
+      return { close: () => {} } as any;
+    });
+
+    (server as any).setupWatchers();
+    expect(capturedListener).toBeDefined();
+
+    capturedListener();
+
+    await new Promise((resolve) => setTimeout(resolve, 250));
+
+    expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining('Compilation failed:'));
+
+    spyCompile.mockRestore();
+    errorSpy.mockRestore();
+    await server.stop();
+  });
+
+  it('should reject start if server fails to be created', async () => {
+    (http.createServer as jest.Mock).mockReturnValueOnce(null as any);
+    const server = new DevServer(config, configPath, 0);
+    await expect(server.start()).rejects.toThrow('Server was not created.');
+  });
+
+  it('should reject start on non-EADDRINUSE server error', async () => {
+    (http.createServer as jest.Mock).mockImplementationOnce((handler: any) => {
+      const actualServer = jest.requireActual('http').createServer(handler);
+      jest.spyOn(actualServer, 'listen').mockImplementationOnce(function (this: any) {
+        process.nextTick(() => {
+          this.emit('error', new Error('Generic Socket Error'));
+        });
+        return this;
+      });
+      return actualServer;
+    });
+
+    const server = new DevServer(config, configPath, 0);
+    await expect(server.start()).rejects.toThrow('Generic Socket Error');
   });
 });

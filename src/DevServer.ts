@@ -66,6 +66,9 @@ export class DevServer {
             this.startListening(resolve, reject);
           }
         } else {
+          if (this.server) {
+            this.server.close();
+          }
           reject(err);
         }
       });
@@ -101,14 +104,11 @@ export class DevServer {
     }
 
     if (this.server) {
+      const activeServer = this.server;
       await new Promise<void>((resolve) => {
-        if (this.server) {
-          this.server.close(() => {
-            resolve();
-          });
-        } else {
+        activeServer.close(() => {
           resolve();
-        }
+        });
       });
       this.server = null;
     }
