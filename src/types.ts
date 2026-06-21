@@ -50,3 +50,15 @@ export interface CaptureOptions {
   outputDir?: string;
   epubChapter?: string; // EPUB chapter capture: "sectionNum.chapterNum" format (e.g. "1.1")
 }
+
+export interface MemoryContent {
+  feedback: string[];
+  style: string[];
+  routines: string[];
+}
+
+export interface BookMemoryData {
+  global: MemoryContent;
+  sections: Record<string, MemoryContent>;
+  chapters: Record<string, MemoryContent>;
+}

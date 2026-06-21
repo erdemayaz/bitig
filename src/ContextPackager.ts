@@ -1,6 +1,8 @@
+import * as path from 'path';
 import { BookCompiler } from './BookCompiler';
 import { Chapter } from './Chapter';
 import { Locale } from './Locale';
+import { MemoryManager } from './MemoryManager';
 
 export class ContextPackager {
   public compiler: BookCompiler;
@@ -17,7 +19,11 @@ export class ContextPackager {
    * @param chapterNum
    * @returns string
    */
-  public packageContextFor(sectionNum: number, chapterNum: number): string {
+  public packageContextFor(
+    sectionNum: number,
+    chapterNum: number,
+    activeMemoryLayers: string[] = ['global', 'section', 'chapter']
+  ): string {
     // Ensure files are loaded
     this.compiler.scanAndLoad();
 
@@ -73,6 +79,21 @@ export class ContextPackager {
 
     // Build guidelines
     const citations = this.compiler.config.citations;
+
+    let memoryBlock = '';
+    if (activeMemoryLayers.length > 0) {
+      const projectDir = path.dirname(this.compiler.config.assetsDir);
+      const memoryPath = path.join(projectDir, 'memory.json');
+      const memoryManager = new MemoryManager(memoryPath);
+      const formatted = memoryManager.getFormattedMemory(
+        { sectionNum, chapterNum },
+        activeMemoryLayers,
+        lang
+      );
+      if (formatted) {
+        memoryBlock = `${formatted}\n`;
+      }
+    }
     const styleTheme = this.compiler.config.theme;
 
     const metadataHeader = Locale.get('contextMetadataHeader', lang);
@@ -135,8 +156,7 @@ ${Locale.get('contextStructureIntro', lang)}
 ${synopsesText}
 
 ---
-
-${guidelinesHeader}
+${memoryBlock}${guidelinesHeader}
 ${Locale.get('contextGuidelinesIntro', lang)}
 ${citationsText}
 

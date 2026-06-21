@@ -12,6 +12,7 @@ import { BookSearcher } from './BookSearcher';
 import { Locale } from './Locale';
 import { DevServer } from './DevServer';
 import { CaptureManager } from './CaptureManager';
+import { MemoryManager } from './MemoryManager';
 
 interface CliArgs {
   command?: string;
@@ -33,6 +34,11 @@ interface CliArgs {
   selector?: string;
   outputDir?: string;
   epubChapter?: string;
+  feedback?: string;
+  style?: string;
+  routine?: string;
+  clear?: boolean;
+  memory?: string;
 }
 
 const args = process.argv.slice(2);
@@ -79,6 +85,9 @@ switch (command) {
     break;
   case 'context':
     handleContext(cliArgs);
+    break;
+  case 'learn':
+    handleLearn(cliArgs);
     break;
   case 'search':
     handleSearch(cliArgs);
@@ -244,6 +253,36 @@ function parseArgs(args: string[]): CliArgs {
         console.error('Error: Option --output-dir requires a value.');
         process.exit(1);
       }
+    } else if (arg === '--feedback') {
+      if (i + 1 < args.length) {
+        result.feedback = args[++i];
+      } else {
+        console.error('Error: Option --feedback requires a value.');
+        process.exit(1);
+      }
+    } else if (arg === '--style') {
+      if (i + 1 < args.length) {
+        result.style = args[++i];
+      } else {
+        console.error('Error: Option --style requires a value.');
+        process.exit(1);
+      }
+    } else if (arg === '--routine') {
+      if (i + 1 < args.length) {
+        result.routine = args[++i];
+      } else {
+        console.error('Error: Option --routine requires a value.');
+        process.exit(1);
+      }
+    } else if (arg === '--clear') {
+      result.clear = true;
+    } else if (arg === '--memory') {
+      if (i + 1 < args.length) {
+        result.memory = args[++i];
+      } else {
+        console.error('Error: Option --memory requires a value.');
+        process.exit(1);
+      }
     } else if (!arg.startsWith('-')) {
       result.positionals.push(arg);
     }
@@ -275,6 +314,7 @@ Commands:
   stats                          Prints progress analytics, word counts, and structure breakdown.
   check                          Runs static diagnostics for broken links, syntax, and citation usage.
   context <sec>.<chap>           Generates a focused RAG/prompt package containing outlines and synopsis.
+  learn <scope> [options]        Updates the persistent AI agent memory and feedback log.
   search <query>                 Searches the entire book for keywords or phrases.
   guide                          Displays the comprehensive English guide on book writing workflow.
   help                           Displays this help menu.
@@ -312,6 +352,13 @@ Metadata Options:
 
 Context Options:
   --target <sec>.<chap>          Alternative way to specify target chapter for context command.
+  --memory <layers>              Comma-separated list of memory layers to include (global,section,chapter or none).
+
+Memory / Learning Options:
+  --feedback "<text>"            Add user feedback to specified scope.
+  --style "<text>"               Add styling instruction to specified scope.
+  --routine "<text>"             Add workflow routine/rule to specified scope.
+  --clear                        Clear memory for specified scope.
 
 Configuration Details:
   For a comprehensive reference on book.json structural and styling parameters (themes, custom fonts, page sizes, margins, colors, etc.), run:
@@ -730,12 +777,68 @@ function handleContext(cliArgs: CliArgs): void {
     const packager = new ContextPackager(compiler);
 
     console.log(Locale.get('buildScanning', config.language));
-    const pack = packager.packageContextFor(sectionNum, chapterNum);
+
+    let activeMemoryLayers = ['global', 'section', 'chapter'];
+    if (cliArgs.memory !== undefined) {
+      const memoryArg = cliArgs.memory.trim().toLowerCase();
+      if (memoryArg === 'none') {
+        activeMemoryLayers = [];
+      } else {
+        activeMemoryLayers = memoryArg
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean);
+      }
+    }
+
+    const pack = packager.packageContextFor(sectionNum, chapterNum, activeMemoryLayers);
     console.log('\n' + pack);
   } catch (error) {
     const err = error as Error;
     const lang = config ? config.language : 'tr';
     console.error(Locale.get('cliErrorFailedPackageContext', lang), err.message);
+    process.exit(1);
+  }
+}
+
+/**
+ * Updates the persistent AI agent memory and feedback log.
+ */
+function handleLearn(cliArgs: CliArgs): void {
+  const scope = cliArgs.positionals[0];
+  if (!scope) {
+    console.error(
+      'Error: Please specify a memory scope, e.g.: bitig learn global or bitig learn 1.3'
+    );
+    process.exit(1);
+  }
+
+  const { feedback, style, routine, clear } = cliArgs;
+
+  if (!feedback && !style && !routine && !clear) {
+    console.error(
+      'Error: Please specify at least one action: --feedback, --style, --routine, or --clear.'
+    );
+    process.exit(1);
+  }
+
+  let config: BookConfig | undefined;
+  try {
+    config = loadConfig(cliArgs.config);
+    const projectDir = path.dirname(config.assetsDir);
+    const memoryPath = path.join(projectDir, 'memory.json');
+    const memoryManager = new MemoryManager(memoryPath);
+
+    if (clear) {
+      memoryManager.clear(scope);
+      console.log(`Memory cleared successfully for scope "${scope}".`);
+    } else {
+      memoryManager.learn(scope, { feedback, style, routine });
+      console.log(`Learned new items successfully for scope "${scope}".`);
+    }
+  } catch (error) {
+    const err = error as Error;
+    console.error(`Error: Failed to update memory: ${err.message}`);
     process.exit(1);
   }
 }
