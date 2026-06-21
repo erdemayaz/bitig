@@ -130,7 +130,20 @@ Outputs this writing workflow guide directly to the terminal for easy reading by
 
 ## AI Agent Workflow Guide
 
-When writing or editing using Bitig, follow this recommended workflow loop:
+When writing or editing using Bitig, you can leverage the **AI-First Autonomous Loop** to write, verify, and summarize content without human intervention:
+
+### 🤖 The AI-First Autonomous Loop
+
+AI agents can execute a complete autonomous loop to draft, visually inspect, and summarize chapters:
+
+1. **`bitig context <coords>`**: Retrieve the complete RAG prompt pack for the chapter you are writing. This feeds you preceding chapter text, outline constraints, and tone rules so you can match vocabulary and pacing perfectly.
+2. **Draft/Edit the content**: Write or update the markdown file under `assets/section-X/X.Y.md`.
+3. **`bitig capture --coords <coords>`** (or `--epub-chapter <coords>`): Generate a visual screenshot of the rendered chapter (either PDF/HTML or EPUB) to verify visual layout, font scaling, or custom CSS rules programmatically.
+4. **`bitig update:metadata <coords> --synopsis "..."`**: Programmatically write a concise summary (synopsis) of what you wrote back to `book.json`. This updates the book's index so subsequent AI agents writing later chapters have an accurate summary of your chapter.
+
+---
+
+### General Workflow Loop
 
 1. **Read Outlines**: Run `bitig stats` to check the manuscript layout.
 2. **Retrieve Context**: Run `bitig context <coords>` for the chapter you are writing. Use the preceding chapter text to match vocabulary, character details, and pacing.

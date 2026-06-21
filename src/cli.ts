@@ -818,7 +818,7 @@ Welcome to Bitig! This guide details the workflow steps to write, refine, and co
      - bitig move:chapter <from> <to>
      - bitig delete:chapter <secNum>.<chapNum>
 
-3. AI CONTEXT PACKAGING (For AI Writers)
+3. AI CONTEXT PACKAGING & AUTONOMOUS LOOP (For AI Writers)
    When using an LLM / AI Agent to write or continue a chapter, do NOT pass the entire book.
    Instead, package a focused context prompt:
      bitig context <secNum>.<chapNum>
@@ -828,6 +828,13 @@ Welcome to Bitig! This guide details the workflow steps to write, refine, and co
      - Style/citation guidelines.
      - The complete text of the preceding chapter to maintain narrative flow.
      - Target chapter's current text (if any) to expand or edit.
+
+   🤖 THE AI-FIRST AUTONOMOUS LOOP:
+   AI agents can execute a complete autonomous cycle to write, verify, and summarize content:
+     1. bitig context 2.3  --> Retrieve prompt pack
+     2. Write/edit manuscript chapter file (assets/section-2/2.3.md)
+     3. bitig capture --coords 2.3 (or --epub-chapter 2.3) --> Visual validation
+     4. bitig update:metadata 2.3 --synopsis "..." --> AI feedback loop to update index
 
 4. DIAGNOSTICS & QUALITY CHECKS
    Run static diagnostics to check for unclosed code blocks, broken internal links, and unused citation terms:
