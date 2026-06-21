@@ -376,4 +376,98 @@ describe('DevServer', () => {
     const server = new DevServer(config, configPath, 0);
     await expect(server.start()).rejects.toThrow('Generic Socket Error');
   });
+
+  it('should default to port 3000 if not specified', () => {
+    const server = new DevServer(config, configPath);
+    expect(server.getPort()).toBe(3000);
+  });
+
+  it('should do nothing on stop if server is already null', async () => {
+    const server = new DevServer(config, configPath, 0);
+    await expect(server.stop()).resolves.toBeUndefined();
+  });
+
+  it('should fallback to direct file watch if recursive watch throws', async () => {
+    (fs.watch as jest.Mock).mockClear();
+    (fs.watch as jest.Mock).mockImplementationOnce(() => {
+      throw new Error('Recursive watch not supported');
+    });
+
+    const server = new DevServer(config, configPath, 0);
+    (server as any).compileBook = jest.fn().mockResolvedValue(undefined);
+    await server.start();
+    expect(fs.watch).toHaveBeenCalledTimes(3);
+    await server.stop();
+  });
+
+  it('should not watch non-existent assets or config directories', async () => {
+    (fs.watch as jest.Mock).mockClear();
+    const existsSpy = jest.spyOn(fs, 'existsSync').mockImplementation((p: any) => {
+      if (typeof p === 'string' && (p.includes('assets') || p.includes('book.json'))) return false;
+      return true;
+    });
+
+    const server = new DevServer(config, configPath, 0);
+    (server as any).compileBook = jest.fn().mockResolvedValue(undefined);
+    await server.start();
+    expect(fs.watch).not.toHaveBeenCalled();
+    await server.stop();
+    existsSpy.mockRestore();
+  });
+
+  it('should handle malformed URL encoding and send 400', async () => {
+    const server = new DevServer(config, configPath, 0);
+    (server as any).compileBook = jest.fn().mockResolvedValue(undefined);
+    await server.start();
+
+    const port = server.getPort();
+    await new Promise<void>((resolve) => {
+      http.get(`http://localhost:${port}/%ff`, (res) => {
+        expect(res.statusCode).toBe(400);
+        res.resume();
+        resolve();
+      });
+    });
+
+    await server.stop();
+  });
+
+  it('should handle empty req.url by mapping to root and serving index.html', async () => {
+    const server = new DevServer(config, configPath, 0);
+    (server as any).compileBook = jest.fn().mockResolvedValue(undefined);
+    await server.start();
+
+    const mockReq = { url: undefined } as any;
+    const mockRes = {
+      writeHead: jest.fn(),
+      end: jest.fn()
+    } as any;
+
+    (server as any).handleRequest(mockReq, mockRes);
+    expect(mockRes.writeHead).toHaveBeenCalledWith(200, expect.any(Object));
+
+    await server.stop();
+  });
+
+  it('should fallback to application/octet-stream for unknown mime types', async () => {
+    const unknownFile = path.join(testDir, 'dist', 'file.unknown');
+    fs.writeFileSync(unknownFile, 'binary-data');
+
+    const server = new DevServer(config, configPath, 0);
+    (server as any).compileBook = jest.fn().mockResolvedValue(undefined);
+    await server.start();
+
+    const port = server.getPort();
+    await new Promise<void>((resolve) => {
+      http.get(`http://localhost:${port}/file.unknown`, (res) => {
+        expect(res.statusCode).toBe(200);
+        expect(res.headers['content-type']).toBe('application/octet-stream');
+        res.resume();
+        resolve();
+      });
+    });
+
+    await server.stop();
+    fs.rmSync(unknownFile, { force: true });
+  });
 });

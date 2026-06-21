@@ -247,4 +247,106 @@ describe('MemoryManager', () => {
     expect(formatted).not.toContain('Section 1 Memory:');
     expect(formatted).toContain('Chapter 1.3 Memory:');
   });
+
+  it('should handle empty file content during load', () => {
+    (fs.existsSync as jest.Mock).mockReturnValue(true);
+    (fs.readFileSync as jest.Mock).mockReturnValue('   ');
+    manager = new MemoryManager(memoryPath);
+    expect(manager.data).toEqual({
+      global: { feedback: [], style: [], routines: [] },
+      sections: {},
+      chapters: {}
+    });
+  });
+
+  it('should fallback to empty memory when parsing fails', () => {
+    (fs.existsSync as jest.Mock).mockReturnValue(true);
+    (fs.readFileSync as jest.Mock).mockReturnValue('invalid-json{');
+    const spy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    manager = new MemoryManager(memoryPath);
+    expect(manager.data).toEqual({
+      global: { feedback: [], style: [], routines: [] },
+      sections: {},
+      chapters: {}
+    });
+    expect(spy).toHaveBeenCalled();
+    spy.mockRestore();
+  });
+
+  it('should parse prefixes section: and chapter:', () => {
+    (fs.existsSync as jest.Mock).mockReturnValue(false);
+    manager = new MemoryManager(memoryPath);
+
+    manager.learn('section:2', { style: 'sec-style' });
+    manager.learn('chapter:2.1', { feedback: 'chap-feedback' });
+
+    expect(manager.data.sections['2'].style).toContain('sec-style');
+    expect(manager.data.chapters['2.1'].feedback).toContain('chap-feedback');
+  });
+
+  it('should return empty string if no memory sections are formatted', () => {
+    (fs.existsSync as jest.Mock).mockReturnValue(false);
+    manager = new MemoryManager(memoryPath);
+    const formatted = manager.getFormattedMemory({ sectionNum: 1, chapterNum: 1 }, ['global']);
+    expect(formatted).toBe('');
+  });
+
+  it('should handle partial JSON properties on load', () => {
+    const partialData = {
+      global: {
+        feedback: ['globalFeedback'],
+        style: [],
+        routines: []
+      }
+    };
+    (fs.existsSync as jest.Mock).mockReturnValue(true);
+    (fs.readFileSync as jest.Mock).mockReturnValue(JSON.stringify(partialData));
+
+    manager = new MemoryManager(memoryPath);
+    expect(manager.data.global.feedback).toContain('globalFeedback');
+    expect(manager.data.sections).toEqual({});
+    expect(manager.data.chapters).toEqual({});
+  });
+
+  it('should handle empty or missing options in learn()', () => {
+    (fs.existsSync as jest.Mock).mockReturnValue(false);
+    manager = new MemoryManager(memoryPath);
+
+    manager.learn('global', {});
+    expect(manager.data.global).toEqual({ feedback: [], style: [], routines: [] });
+
+    manager.learn('global', { feedback: '  ', style: '  ', routine: '  ' });
+    expect(manager.data.global).toEqual({ feedback: [], style: [], routines: [] });
+  });
+
+  it('should handle formatting for empty sections/chapters or deactivated layers', () => {
+    const fakeData = {
+      global: { feedback: [], style: [], routines: [] },
+      sections: {
+        '1': { feedback: [], style: [], routines: [] }
+      },
+      chapters: {
+        '1.1': { feedback: [], style: [], routines: [] }
+      }
+    };
+    (fs.existsSync as jest.Mock).mockReturnValue(true);
+    (fs.readFileSync as jest.Mock).mockReturnValue(JSON.stringify(fakeData));
+
+    manager = new MemoryManager(memoryPath);
+    const formatted = manager.getFormattedMemory({ sectionNum: 1, chapterNum: 1 }, [
+      'global',
+      'section',
+      'chapter'
+    ]);
+    expect(formatted).toBe('');
+  });
+
+  it('should throw on invalid scope', () => {
+    (fs.existsSync as jest.Mock).mockReturnValue(false);
+    manager = new MemoryManager(memoryPath);
+
+    expect(() => manager.learn('invalid:scope', { style: 'style' })).toThrow(
+      'Invalid memory scope'
+    );
+  });
 });

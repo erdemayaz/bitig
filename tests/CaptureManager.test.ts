@@ -61,8 +61,14 @@ describe('CaptureManager', () => {
       setContent: jest.fn().mockResolvedValue(undefined),
       addScriptTag: jest.fn().mockResolvedValue(undefined),
       evaluate: jest.fn().mockImplementation((fn, ...args) => {
-        if (fn && fn.toString().includes('getDocument')) {
+        const fnStr = fn ? fn.toString() : '';
+        if (fnStr.includes('getDocument')) {
           return { success: true };
+        }
+        if (fnStr.includes('pdf-canvas')) {
+          if (typeof fn === 'function' && (global as any).document) {
+            fn();
+          }
         }
         return undefined;
       }),
@@ -323,5 +329,71 @@ describe('CaptureManager', () => {
 
     const expectedScreenshot = path.join(config.distDir, 'screenshots', 'epub-chapter-1-1.png');
     expect(fs.existsSync(expectedScreenshot)).toBe(true);
+  });
+
+  it('should throw on invalid coords format in captureEpubChapter', async () => {
+    const manager = new CaptureManager(config, configPath);
+    await expect(manager.captureEpubChapter('invalid', 'output')).rejects.toThrow(
+      'Invalid EPUB chapter coordinates: "invalid". Expected format: "1.2"'
+    );
+  });
+
+  it('should throw on non-numeric coordinates in captureEpubChapter', async () => {
+    const manager = new CaptureManager(config, configPath);
+    await expect(manager.captureEpubChapter('1.invalid', 'output')).rejects.toThrow(
+      'Invalid EPUB chapter coordinates: "1.invalid". Must be numeric.'
+    );
+  });
+
+  it('should create outputDir in captureEpubChapter if it does not exist', async () => {
+    const mockElement = {
+      screenshot: jest.fn().mockImplementation((opts: any) => {
+        if (opts && opts.path) {
+          fs.writeFileSync(opts.path, 'png data');
+        }
+        return Promise.resolve(Buffer.from('png data'));
+      })
+    };
+    setupMockPuppeteer(mockElement, {
+      screenshot: mockElement.screenshot
+    });
+
+    const manager = new CaptureManager(config, configPath);
+    const nonExistentDir = path.join(config.distDir, 'new-screenshots-dir');
+    if (fs.existsSync(nonExistentDir)) {
+      fs.rmSync(nonExistentDir, { recursive: true, force: true });
+    }
+
+    await manager.captureEpubChapter('1.1', nonExistentDir);
+    expect(fs.existsSync(nonExistentDir)).toBe(true);
+    fs.rmSync(nonExistentDir, { recursive: true, force: true });
+  });
+
+  it('should remove existing canvas in PDF capture page evaluate', async () => {
+    const mockElement = {
+      screenshot: jest.fn().mockResolvedValue(Buffer.from('png data'))
+    };
+    setupMockPuppeteer(mockElement);
+
+    const pdfPath = path.join(config.distDir, 'book.pdf');
+    fs.writeFileSync(pdfPath, 'pdf content');
+
+    const manager = new CaptureManager(config, configPath);
+
+    const fakeCanvas = { remove: jest.fn() };
+    const fakeDocument = {
+      getElementById: jest.fn().mockReturnValue(fakeCanvas),
+      createElement: jest.fn().mockReturnValue({}),
+      body: { appendChild: jest.fn() }
+    };
+    (global as any).document = fakeDocument;
+
+    await manager.capture({ page: 1 });
+
+    expect(fakeDocument.getElementById).toHaveBeenCalledWith('pdf-canvas');
+    expect(fakeCanvas.remove).toHaveBeenCalled();
+
+    delete (global as any).document;
+    fs.rmSync(pdfPath, { force: true });
   });
 });
