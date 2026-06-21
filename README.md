@@ -145,9 +145,17 @@ bitig guide
 
 Outputs this writing workflow guide directly to the terminal for easy reading by AI agents.
 
-### 10. Semantic Diagnostics & Quality Scoring
+### 10. Semantic Diagnostics Guide
 
-Provide a framework to analyze manuscript quality (e.g. style consistency, narrative flow, readability) using AI evaluations based on custom rubrics.
+```bash
+bitig diagnostics-guide
+```
+
+Outputs the detailed step-by-step semantic diagnostics and quality scoring guide directly to the terminal for easy reading by AI agents.
+
+### 11. Semantic Diagnostics & Quality Scoring
+
+Provide a framework to analyze manuscript quality (e.g. style consistency, narrative flow, readability) using AI evaluations based on custom rubrics. For a complete guide on how this loop works, run `bitig diagnostics-guide`.
 
 ```bash
 # Initialize a template quality-guidelines.json schema in the project root

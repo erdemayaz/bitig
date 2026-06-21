@@ -133,4 +133,13 @@ describe('Bitig CLI Integration Tests', () => {
     expect(checkOutput).toContain('Running book diagnostics...');
     expect(checkOutput).toContain('Diagnostics finished: 0 errors, 1 warnings found.');
   });
+
+  it('should display the diagnostics guide successfully', () => {
+    const output = execSync(`node ${cliPath} diagnostics-guide`, {
+      cwd: tempDir,
+      encoding: 'utf8'
+    });
+    expect(output).toContain('SEMANTIC DIAGNOSTICS & QUALITY SCORING GUIDE');
+    expect(output).toContain('analyze:init');
+  });
 });

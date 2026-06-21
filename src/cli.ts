@@ -139,6 +139,11 @@ switch (command) {
   case 'guide':
     handleGuide();
     break;
+  case 'diagnostics-guide':
+  case 'diagnostics:guide':
+  case 'agnostics-guide':
+    handleDiagnosticsGuide();
+    break;
   case 'version':
     showVersion();
     break;
@@ -173,6 +178,8 @@ function parseArgs(args: string[]): CliArgs {
       result.help = true;
     } else if (arg === '-g' || arg === '--guide') {
       result.command = 'guide';
+    } else if (arg === '-dg' || arg === '--diagnostics-guide' || arg === '--agnostics-guide') {
+      result.command = 'diagnostics-guide';
     } else if (arg === '-c' || arg === '--config') {
       if (i + 1 < args.length) {
         result.config = args[++i];
@@ -365,11 +372,13 @@ Commands:
   learn <scope> [options]        Updates the persistent AI agent memory and feedback log.
   search <query>                 Searches the entire book for keywords or phrases.
   guide                          Displays the comprehensive English guide on book writing workflow.
+  diagnostics-guide              Displays the detailed AI quality scoring workflow guide.
   help                           Displays this help menu.
 
 Global Options:
   -c, --config <path>            Path to the book configuration JSON file (default: ./book.json)
   -g, --guide                    Displays the comprehensive English guide on book writing workflow.
+  -dg, --diagnostics-guide       Displays the detailed AI quality scoring workflow guide.
   -v, --version                  Displays the version number.
 
 Build Options:
@@ -953,6 +962,36 @@ function handleSearch(cliArgs: CliArgs): void {
 }
 
 /**
+ * Displays the comprehensive diagnostics and quality scoring guide.
+ * Reads diagnostics-guide.md from resources.
+ */
+function handleDiagnosticsGuide(): void {
+  const guidePath = path.join(__dirname, 'resources', 'diagnostics-guide.md');
+  if (fs.existsSync(guidePath)) {
+    try {
+      const content = fs.readFileSync(guidePath, 'utf8');
+      console.log(content);
+      return;
+    } catch (e) {
+      // Fallback if read failed
+    }
+  }
+
+  // Fallback string
+  console.log(
+    `
+# BITIG - SEMANTIC DIAGNOSTICS & QUALITY SCORING GUIDE
+
+This guide explains the workflow for quality guidelines and scoring.
+1. Run "bitig analyze:init [--file template.json]" to setup quality criteria.
+2. Run "bitig analyze:context <coords>" to package manuscript and criteria for the AI.
+3. Generate the scoring output JSON file using your LLM.
+4. Run "bitig analyze:report <coords> --file <temp.json>" to see the formatted scoring table.
+  `.trim()
+  );
+}
+
+/**
  * Displays the comprehensive English writing workflow guide.
  * Reads README.md if available, otherwise prints the built-in guide.
  */
@@ -1052,6 +1091,9 @@ Welcome to Bitig! This guide details the workflow steps to write, refine, and co
 
 For detailed command options, run:
   bitig --help
+
+For detailed semantic diagnostics workflow and JSON schemas, run:
+  bitig diagnostics-guide
 
 ================================================================================
 ## BOOK CONFIGURATION REFERENCE (book.json)
