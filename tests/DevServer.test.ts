@@ -167,8 +167,9 @@ describe('DevServer', () => {
       const chapterPath = path.join(testDir, 'assets', 'section-1', '1.1.md');
       fs.writeFileSync(chapterPath, '# Intro\n\nWelcome to dev server tests modified.', 'utf8');
 
-      // Trigger watch manually
+      // Trigger watch manually (twice to test and cover the debounce clearTimeout branch)
       expect(capturedListener).toBeDefined();
+      capturedListener();
       capturedListener();
 
       // Wait for debounce and compile
