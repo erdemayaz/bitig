@@ -39,10 +39,32 @@ interface CliArgs {
   routine?: string;
   clear?: boolean;
   memory?: string;
+  version?: boolean;
 }
 
 const args = process.argv.slice(2);
+
+if (args.length === 0) {
+  console.log(`Bitig - OOP Book Compiler CLI
+
+Usage:
+  bitig <command> [options]
+
+To see all available commands and options, run:
+  bitig --help
+
+To initialize a new project, run:
+  bitig init
+`);
+  process.exit(0);
+}
+
 const cliArgs = parseArgs(args);
+
+if (cliArgs.version) {
+  showVersion();
+  process.exit(0);
+}
 
 if (
   cliArgs.help ||
@@ -105,6 +127,9 @@ switch (command) {
     break;
   case 'guide':
     handleGuide();
+    break;
+  case 'version':
+    showVersion();
     break;
   default:
     console.error(`Error: Unknown command "${command}"`);
@@ -283,6 +308,8 @@ function parseArgs(args: string[]): CliArgs {
         console.error('Error: Option --memory requires a value.');
         process.exit(1);
       }
+    } else if (arg === '-v' || arg === '--version') {
+      result.version = true;
     } else if (!arg.startsWith('-')) {
       result.positionals.push(arg);
     }
@@ -322,6 +349,7 @@ Commands:
 Global Options:
   -c, --config <path>            Path to the book configuration JSON file (default: ./book.json)
   -g, --guide                    Displays the comprehensive English guide on book writing workflow.
+  -v, --version                  Displays the version number.
 
 Build Options:
   -t, --theme <theme>            Override the visual theme (serif, sans-serif, academic).
@@ -364,6 +392,23 @@ Configuration Details:
   For a comprehensive reference on book.json structural and styling parameters (themes, custom fonts, page sizes, margins, colors, etc.), run:
     bitig guide
 `);
+}
+
+/**
+ * Displays the current version number.
+ */
+function showVersion(): void {
+  try {
+    const pkgPath = path.join(__dirname, '..', 'package.json');
+    if (fs.existsSync(pkgPath)) {
+      const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+      console.log(`bitig v${pkg.version}`);
+    } else {
+      console.log('bitig v1.0.3');
+    }
+  } catch (e) {
+    console.log('bitig v1.0.3');
+  }
 }
 
 /**
