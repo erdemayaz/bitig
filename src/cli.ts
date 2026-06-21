@@ -11,6 +11,7 @@ import { ContextPackager } from './ContextPackager';
 import { BookSearcher } from './BookSearcher';
 import { Locale } from './Locale';
 import { DevServer } from './DevServer';
+import { CaptureManager } from './CaptureManager';
 
 interface CliArgs {
   command?: string;
@@ -25,6 +26,11 @@ interface CliArgs {
   target?: string;
   synopsis?: string;
   port?: number;
+  page?: number;
+  range?: string;
+  coords?: string;
+  selector?: string;
+  outputDir?: string;
 }
 
 const args = process.argv.slice(2);
@@ -81,6 +87,10 @@ switch (command) {
     break;
   case 'update:metadata':
     handleUpdateMetadata(cliArgs);
+    break;
+  case 'capture':
+  case 'screenshot':
+    handleCapture(cliArgs);
     break;
   case 'guide':
     handleGuide();
@@ -181,6 +191,46 @@ function parseArgs(args: string[]): CliArgs {
       result.pdf = false;
     } else if (arg === '--pdf') {
       result.pdf = true;
+    } else if (arg === '--page') {
+      if (i + 1 < args.length) {
+        const pageVal = parseInt(args[++i], 10);
+        if (isNaN(pageVal)) {
+          console.error('Error: Option --page requires a valid number.');
+          process.exit(1);
+        }
+        result.page = pageVal;
+      } else {
+        console.error('Error: Option --page requires a value.');
+        process.exit(1);
+      }
+    } else if (arg === '--range') {
+      if (i + 1 < args.length) {
+        result.range = args[++i];
+      } else {
+        console.error('Error: Option --range requires a value.');
+        process.exit(1);
+      }
+    } else if (arg === '--coords') {
+      if (i + 1 < args.length) {
+        result.coords = args[++i];
+      } else {
+        console.error('Error: Option --coords requires a value.');
+        process.exit(1);
+      }
+    } else if (arg === '--selector') {
+      if (i + 1 < args.length) {
+        result.selector = args[++i];
+      } else {
+        console.error('Error: Option --selector requires a value.');
+        process.exit(1);
+      }
+    } else if (arg === '--output-dir') {
+      if (i + 1 < args.length) {
+        result.outputDir = args[++i];
+      } else {
+        console.error('Error: Option --output-dir requires a value.');
+        process.exit(1);
+      }
     } else if (!arg.startsWith('-')) {
       result.positionals.push(arg);
     }
@@ -204,6 +254,7 @@ Commands:
   build                          Compiles the book according to the configuration.
   dev / serve                    Starts a local preview server with hot-reloading on port 3000.
   update:metadata <sec>.<chap>   Programmatically updates chapter synopsis and/or H1 title.
+  capture / screenshot           Generates PNG screenshots of PDF pages or HTML regions.
   add:section <secNum>           Creates a new section folder and updates book.json.
   add:chapter <secNum>.<chapNum> Creates a template markdown file for the chapter.
   move:chapter <from> <to>       Moves and renames a chapter (e.g., bitig move:chapter 1.1 1.2).
@@ -228,6 +279,13 @@ Build Options:
 
 Dev Options:
   -p, --port <number>            Port for the local development preview server (default: 3000).
+
+Capture Options:
+  --page <number>                Page number of the PDF to capture (default: 1 if no HTML options are set).
+  --range <start>-<end>          Range of pages to capture (e.g. 1-3).
+  --coords <coords>              Section/Chapter coordinates to capture from HTML (e.g. 1.1).
+  --selector <selector>          CSS selector of the element to capture from HTML (e.g. ".cover-page").
+  --output-dir <dir>             Directory where screenshots will be saved (default: dist/screenshots).
 
 Add Options:
   --title "<title>"              Set a custom title for the section or chapter.
@@ -773,6 +831,10 @@ Welcome to Bitig! This guide details the workflow steps to write, refine, and co
    Update chapter titles and synopses programmatically:
      bitig update:metadata <secNum>.<chapNum> [--synopsis "<text>"] [--title "<title>"]
 
+8. VISUAL SCREENSHOT CAPTURE
+   Capture PNG screenshots of PDF pages or specific HTML sections/chapters:
+     bitig capture [--page <number>] [--range <start>-<end>] [--coords <coords>] [--selector <selector>] [--output-dir <dir>]
+
 For detailed command options, run:
   bitig --help
 
@@ -905,6 +967,26 @@ function handleUpdateMetadata(cliArgs: CliArgs): void {
     const err = error as Error;
     const lang = config ? config.language : 'tr';
     console.error(`Error: Failed to update metadata: ${err.message}`);
+    process.exit(1);
+  }
+}
+
+async function handleCapture(cliArgs: CliArgs): Promise<void> {
+  let config: BookConfig | undefined;
+  try {
+    config = loadConfig(cliArgs.config);
+    const configPath = getConfigPath(cliArgs.config);
+    const captureManager = new CaptureManager(config, configPath);
+    await captureManager.capture({
+      page: cliArgs.page,
+      range: cliArgs.range,
+      coords: cliArgs.coords,
+      selector: cliArgs.selector,
+      outputDir: cliArgs.outputDir
+    });
+  } catch (error) {
+    const err = error as Error;
+    console.error(`Error: Visual capture failed: ${err.message}`);
     process.exit(1);
   }
 }

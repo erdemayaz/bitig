@@ -92,7 +92,21 @@ Produces a focused context window prompt pack for LLM/RAG writers to edit or con
 - Complete text of the preceding chapter to maintain tone and narrative flow.
 - Visual theme guidelines and citation constraints.
 
-### 7. Workflow Guide
+### 7. Visual Screenshot Capture
+
+```bash
+bitig capture [options]
+```
+
+Generates PNG screenshots of compiled PDF pages or specific HTML sections/chapters for layout verification (useful for visual regression checks by AI agents).
+
+- `--page <number>`: Capture a specific page of the PDF (default: 1).
+- `--range <start>-<end>`: Capture a range of pages (e.g. `1-3`).
+- `--coords <coords>`: Capture a specific chapter by section/chapter coordinates from the HTML (e.g. `1.1`).
+- `--selector <selector>`: Capture a specific HTML element using CSS selector (e.g. `".cover-page"`).
+- `--output-dir <dir>`: Custom folder to save screenshots (defaults to `dist/screenshots`).
+
+### 8. Workflow Guide
 
 ```bash
 bitig guide
@@ -114,8 +128,9 @@ When writing or editing using Bitig, follow this recommended workflow loop:
 4. **Keyword Check**: Use `bitig search "<keyword>"` to check consistency of terms across other sections.
 5. **Static Diagnostics**: Run `bitig check` to verify formatting.
 6. **Local Preview**: Run `bitig dev` to start the live preview server, open `http://localhost:3000` in a browser, and watch changes compile and hot-reload in real-time.
-7. **Compile for Release**: Run `bitig build` to generate the final distribution files (including PDF compilation).
-8. **Commit & Format**: Run `git commit -m "your message"`. Husky and `lint-staged` will automatically run Prettier to format your modifications before finalizing the commit.
+7. **Visual Verification**: Run `bitig capture` to generate layout screenshots of specific pages or chapters and verify visual styling programmatically.
+8. **Compile for Release**: Run `bitig build` to generate the final distribution files (including PDF compilation).
+9. **Commit & Format**: Run `git commit -m "your message"`. Husky and `lint-staged` will automatically run Prettier to format your modifications before finalizing the commit.
 
 ---
 

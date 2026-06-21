@@ -148,7 +148,7 @@ export class BookCompiler {
           shifted = TextProcessor.applyCitations(shifted, citationRules);
         }
 
-        markdownContent += shifted + '\n\n';
+        markdownContent += `<div class="chapter-container" id="chapter-${chapter.sectionNum}-${chapter.chapterNum}" data-coords="${chapter.sectionNum}.${chapter.chapterNum}">\n\n${shifted}\n\n</div>\n\n`;
 
         // Add page break if not the last chapter in the section
         if (cIndex < section.chapters.length - 1) {

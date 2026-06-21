@@ -35,3 +35,11 @@ export interface SpecialFiles {
   epilogue?: string;
   bibliography?: string;
 }
+
+export interface CaptureOptions {
+  page?: number;
+  range?: string;
+  coords?: string;
+  selector?: string;
+  outputDir?: string;
+}

@@ -57,6 +57,10 @@ export class Locale {
       devServerReady:
         'Önizleme sunucusu hazır. Tarayıcınızda http://localhost:{port}/ adresini açın.',
       cliErrorFailedStartDevServer: 'Geliştirme sunucusu başlatılamadı:',
+      captureStarting: 'Ekran görüntüleri üretiliyor...',
+      captureSaved: 'Ekran görüntüsü şuraya kaydedildi: {path}',
+      captureFailed: 'Ekran görüntüsü alınamadı: {error}',
+      captureInvalidPage: 'Geçersiz sayfa numarası: {page}',
       managerChapterTemplate:
         '# {title}\n\nBu bölüm {sectionNum}.{chapterNum} başlığı "{title}". İçeriği buraya yazın.\n',
       initSuccessJson: 'book.json oluşturuldu.',
@@ -166,6 +170,10 @@ export class Locale {
       devServerCompiling: 'Change detected. Recompiling...',
       devServerReady: 'Preview server ready. Open http://localhost:{port}/ in your browser.',
       cliErrorFailedStartDevServer: 'Failed to start development server:',
+      captureStarting: 'Generating screenshots...',
+      captureSaved: 'Screenshot saved to: {path}',
+      captureFailed: 'Failed to capture screenshot: {error}',
+      captureInvalidPage: 'Invalid page number: {page}',
       managerChapterTemplate:
         '# {title}\n\nThis is chapter {sectionNum}.{chapterNum} titled "{title}". Fill in the content.\n',
       initSuccessJson: 'book.json created.',
