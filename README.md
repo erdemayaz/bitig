@@ -5,6 +5,7 @@
 ![License](https://img.shields.io/npm/l/@erdemayaz/bitig.svg)
 ![Coverage](https://img.shields.io/badge/coverage-97%25-brightgreen)
 ![Code Style](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)
+![Languages](https://img.shields.io/badge/languages-TR%20%7C%20EN%20%7C%20DE%20%7C%20ES%20%7C%20FR-blueviolet)
 
 Bitig is a structured, type-safe TypeScript command-line tool designed for authors and AI agents to outline, write, analyze, lint, and compile manuscripts into high-quality publications (Markdown, HTML, PDF, and AI-readable metadata).
 
