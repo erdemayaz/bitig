@@ -328,7 +328,9 @@ describe('BookCompiler', () => {
       } as any;
 
       const compiledSplit = compilerSplit.compile();
-      expect(compiledSplit.markdown).toContain('<div class="section-header">');
+      expect(compiledSplit.markdown).toContain(
+        '<div class="section-header" id="section-header-1">'
+      );
       expect(compiledSplit.markdown).toContain('<div class="section-number">Section 1</div>');
       expect(compiledSplit.markdown).toContain('<h1 class="section-title">Part One</h1>');
 
@@ -367,6 +369,27 @@ describe('BookCompiler', () => {
       const compiledHidden = compilerHidden.compile();
       expect(compiledHidden.markdown).toContain('<div id="part-one"></div>');
       expect(compiledHidden.markdown).not.toContain('# Part One');
+
+      // 4. split style with special section (e.g. Epilogue 998)
+      const specialSection = new Section(998, 'Epilogue');
+      const epilogueChapter = new Chapter('assets/epilogue.md', './assets');
+      epilogueChapter.title = 'End';
+      epilogueChapter.rawContent = '# End\nContent.';
+      specialSection.addChapter(epilogueChapter);
+
+      const compilerSpecial = new BookCompiler(configSplit);
+      compilerSpecial.sections = [specialSection];
+      compilerSpecial.metadataGenerator = {
+        generateJSONMetadata: () => '{}',
+        injectYAMLFrontmatter: (c: string) => c
+      } as any;
+
+      const compiledSpecial = compilerSpecial.compile();
+      expect(compiledSpecial.markdown).toContain(
+        '<div class="section-header" id="section-header-998">'
+      );
+      expect(compiledSpecial.markdown).not.toContain('<div class="section-number">');
+      expect(compiledSpecial.markdown).toContain('<h1 class="section-title">Epilogue</h1>');
     });
 
     it('should inject KaTeX stylesheets, script tags, and auto-render config', () => {

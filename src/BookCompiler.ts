@@ -136,10 +136,15 @@ export class BookCompiler {
         if (section.sectionNum > 0) {
           const style = this.config.sectionHeaderStyle;
           if (style === 'split') {
-            const sectionLabel = Locale.get('sectionLabel', this.config.language, {
-              num: section.sectionNum
-            });
-            markdownContent += `\n\n<div class="section-header">\n  <div class="section-number">${sectionLabel}</div>\n  <h1 class="section-title">${section.title}</h1>\n</div>\n\n`;
+            const isSpecial = section.sectionNum >= 998;
+            if (isSpecial) {
+              markdownContent += `\n\n<div class="section-header" id="section-header-${section.sectionNum}">\n  <h1 class="section-title">${section.title}</h1>\n</div>\n\n`;
+            } else {
+              const sectionLabel = Locale.get('sectionLabel', this.config.language, {
+                num: section.sectionNum
+              });
+              markdownContent += `\n\n<div class="section-header" id="section-header-${section.sectionNum}">\n  <div class="section-number">${sectionLabel}</div>\n  <h1 class="section-title">${section.title}</h1>\n</div>\n\n`;
+            }
           } else if (style === 'title-only') {
             markdownContent += `\n\n# ${section.title}\n\n`;
           } else if (style === 'hidden') {
