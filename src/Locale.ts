@@ -111,7 +111,13 @@ export class Locale {
       contextInstruction1: '- Bir önceki bölümün stilini, kelime dağarcığını ve tonunu koruyun.',
       contextInstruction2: '- Özetlerde zaten ele alan bilgileri tekrarlamayın.',
       contextInstruction3: '- Atıf terimlerini doğal bir şekilde entegre edin.',
-      contextInstruction4: '- YALNIZCA geçerli markdown metni çıktısı verin.'
+      contextInstruction4: '- YALNIZCA geçerli markdown metni çıktısı verin.',
+      copyrightPageTitle: 'TELİF HAKKI',
+      copyrightPublisherLabel: 'Yayımcı',
+      copyrightPublishedLabel: 'Yayın Tarihi',
+      copyrightIsbnLabel: 'ISBN',
+      copyrightNoticeText:
+        'Tüm hakları saklıdır. Bu yayının hiçbir bölümü, yazarın veya yayıncının önceden yazılı izni olmaksızın, elektronik veya mekanik yöntemler dahil olmak üzere hiçbir şekilde veya hiçbir yolla çoğaltılamaz, dağıtılamaz veya iletilemez.'
     },
     en: {
       tocHtmlHeading: 'TABLE OF CONTENTS',
@@ -224,7 +230,13 @@ export class Locale {
       contextInstruction1: '- Maintain the style, vocabulary, and tone of the preceding chapter.',
       contextInstruction2: '- Do not repeat information already covered in the synopses.',
       contextInstruction3: '- Integrate the citation terms naturally.',
-      contextInstruction4: '- Output ONLY valid markdown text.'
+      contextInstruction4: '- Output ONLY valid markdown text.',
+      copyrightPageTitle: 'COPYRIGHT',
+      copyrightPublisherLabel: 'Publisher',
+      copyrightPublishedLabel: 'Published',
+      copyrightIsbnLabel: 'ISBN',
+      copyrightNoticeText:
+        'All rights reserved. No part of this publication may be reproduced, distributed, or transmitted in any form or by any means, including photocopying, recording, or other electronic or mechanical methods, without the prior written permission of the publisher, except in the case of brief quotations embodied in critical reviews and certain other noncommercial uses permitted by copyright law.'
     },
     de: {
       tocHtmlHeading: 'INHALTSVERZEICHNIS',
@@ -344,7 +356,13 @@ export class Locale {
       contextInstruction2:
         '- Wiederholen Sie keine Informationen, die bereits in den Zusammenfassungen behandelt wurden.',
       contextInstruction3: '- Integrieren Sie die Zitierbegriffe natürlich.',
-      contextInstruction4: '- Geben Sie NUR gültigen Markdown-Text aus.'
+      contextInstruction4: '- Geben Sie NUR gültigen Markdown-Text aus.',
+      copyrightPageTitle: 'URHEBERRECHT',
+      copyrightPublisherLabel: 'Herausgeber',
+      copyrightPublishedLabel: 'Veröffentlicht',
+      copyrightIsbnLabel: 'ISBN',
+      copyrightNoticeText:
+        'Alle Rechte vorbehalten. Kein Teil dieser Veröffentlichung darf ohne die vorherige schriftliche Genehmigung des Herausgebers in irgendeiner Form oder mit irgendwelchen Mitteln, einschließlich Fotokopieren, Aufzeichnen oder anderen elektronischen oder mechanischen Methoden, vervielfältigt, verbreitet oder übertragen werden.'
     },
     es: {
       tocHtmlHeading: 'ÍNDICE DE CONTENIDOS',
@@ -461,7 +479,13 @@ export class Locale {
       contextInstruction1: '- Mantenga el estilo, vocabulario y tono del capítulo anterior.',
       contextInstruction2: '- No repita información que ya se haya cubierto en las sinopsis.',
       contextInstruction3: '- Integre los términos de cita de forma natural.',
-      contextInstruction4: '- Devuelva ÚNICAMENTE texto markdown válido.'
+      contextInstruction4: '- Devuelva ÚNICAMENTE texto markdown válido.',
+      copyrightPageTitle: 'DERECHOS DE AUTOR',
+      copyrightPublisherLabel: 'Editorial',
+      copyrightPublishedLabel: 'Publicado',
+      copyrightIsbnLabel: 'ISBN',
+      copyrightNoticeText:
+        'Todos los derechos reservados. Ninguna parte de esta publicación puede ser reproducida, distribuida o transmitida de ninguna forma ni por ningún medio, incluyendo fotocopias, grabaciones u otros métodos electrónicos o mecánicos, sin el permiso previo por escrito del editor.'
     },
     fr: {
       tocHtmlHeading: 'TABLE DES MATIÈRES',
@@ -577,7 +601,13 @@ export class Locale {
       contextInstruction1: '- Maintenez le style, le vocabulaire et le ton du chapitre précédent.',
       contextInstruction2: '- Ne répétez pas les informations déjà couvertes dans les synopsis.',
       contextInstruction3: '- Intégrez les termes de citation naturellement.',
-      contextInstruction4: '- Fournissez UNIQUEMENT du texte markdown valide.'
+      contextInstruction4: '- Fournissez UNIQUEMENT du texte markdown valide.',
+      copyrightPageTitle: "DROIT D'AUTEUR",
+      copyrightPublisherLabel: 'Éditeur',
+      copyrightPublishedLabel: 'Publié',
+      copyrightIsbnLabel: 'ISBN',
+      copyrightNoticeText:
+        "Tous droits réservés. Aucune partie de cette publication ne peut être reproduite, distribuée ou transmise sous quelque forme ou par quelque moyen que ce soit, y compris la photocopie, l'enregistrement ou d'autres méthodes électroniques ou mécaniques, sans l'autorisation écrite préalable de l'éditeur."
     }
   };
 

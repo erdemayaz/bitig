@@ -15,6 +15,10 @@ describe('BookConfig', () => {
       expect(config.author).toBe('Anonymous');
       expect(config.theme).toBe('serif');
       expect(config.pdf).toBe(true);
+      expect(config.isbn).toBe('');
+      expect(config.publisher).toBe('');
+      expect(config.publishDate).toBe('');
+      expect(config.copyright).toBe('');
     });
   });
 
@@ -58,6 +62,32 @@ describe('BookConfig', () => {
       const config = new BookConfig();
       config.language = 123 as any;
       expect(() => config.validate()).toThrow('Config Error: "language" must be a valid string.');
+    });
+
+    it('should throw an error if isbn is not a string', () => {
+      const config = new BookConfig();
+      config.isbn = 123 as any;
+      expect(() => config.validate()).toThrow('Config Error: "isbn" must be a valid string.');
+    });
+
+    it('should throw an error if publisher is not a string', () => {
+      const config = new BookConfig();
+      config.publisher = 123 as any;
+      expect(() => config.validate()).toThrow('Config Error: "publisher" must be a valid string.');
+    });
+
+    it('should throw an error if publishDate is not a string', () => {
+      const config = new BookConfig();
+      config.publishDate = 123 as any;
+      expect(() => config.validate()).toThrow(
+        'Config Error: "publishDate" must be a valid string.'
+      );
+    });
+
+    it('should throw an error if copyright is not a string', () => {
+      const config = new BookConfig();
+      config.copyright = 123 as any;
+      expect(() => config.validate()).toThrow('Config Error: "copyright" must be a valid string.');
     });
   });
 

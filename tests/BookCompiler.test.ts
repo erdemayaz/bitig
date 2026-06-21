@@ -277,5 +277,31 @@ describe('BookCompiler', () => {
       // Should contain page break class between c1 and c2
       expect(compiled.html).toContain('<div class="page-break"></div>');
     });
+
+    it('should inject metadata tags and copyright page HTML if configured', () => {
+      const configWithMeta = new BookConfig({
+        title: 'Metadata Book',
+        author: 'John Doe',
+        assetsDir: './assets',
+        distDir: './dist',
+        isbn: '123-456-789',
+        publisher: 'Test Publisher',
+        publishDate: '2026',
+        copyright: 'All Rights Reserved',
+        language: 'en'
+      });
+      const compiler = new BookCompiler(configWithMeta);
+      compiler.scanAndLoad();
+      const compiled = compiler.compile();
+
+      expect(compiled.html).toContain(
+        '<meta name="dcterms.identifier" content="urn:isbn:123-456-789">'
+      );
+      expect(compiled.html).toContain('<meta name="dcterms.publisher" content="Test Publisher">');
+      expect(compiled.html).toContain('<meta name="dcterms.date" content="2026">');
+      expect(compiled.html).toContain('<meta name="dcterms.rights" content="All Rights Reserved">');
+      expect(compiled.html).toContain('<div class="copyright-page">');
+      expect(compiled.html).toContain('COPYRIGHT');
+    });
   });
 });

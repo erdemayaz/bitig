@@ -84,4 +84,33 @@ describe('AgentMetadataGenerator', () => {
     const wordCountEmpty = (gen as any)._countWords('');
     expect(wordCountEmpty).toBe(0);
   });
+
+  it('should include new publishing metadata (isbn, publisher, publishDate, copyright) in JSON and YAML', () => {
+    const configWithMeta = new BookConfig({
+      title: 'Meta Book',
+      subtitle: 'The Quest',
+      author: 'Author One',
+      description: 'An AI story',
+      isbn: '123-45-67890-12-3',
+      publisher: 'Bitig Pub',
+      publishDate: '2026-06-21',
+      copyright: 'All Rights Reserved'
+    });
+    const gen = new AgentMetadataGenerator(configWithMeta, sections);
+
+    // JSON assertions
+    const jsonStr = gen.generateJSONMetadata();
+    const data = JSON.parse(jsonStr);
+    expect(data.book.isbn).toBe('123-45-67890-12-3');
+    expect(data.book.publisher).toBe('Bitig Pub');
+    expect(data.book.publishDate).toBe('2026-06-21');
+    expect(data.book.copyright).toBe('All Rights Reserved');
+
+    // YAML assertions
+    const yaml = gen.injectYAMLFrontmatter('## Body');
+    expect(yaml).toContain('isbn: "123-45-67890-12-3"');
+    expect(yaml).toContain('publisher: "Bitig Pub"');
+    expect(yaml).toContain('publishDate: "2026-06-21"');
+    expect(yaml).toContain('copyright: "All Rights Reserved"');
+  });
 });

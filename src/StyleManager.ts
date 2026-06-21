@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { BookConfig } from './BookConfig';
+import { Locale } from './Locale';
 
 export class StyleManager {
   public themeName: string;
@@ -85,6 +86,61 @@ export class StyleManager {
   ${config.subtitle ? `<h2 class="cover-subtitle">${config.subtitle}</h2>` : ''}
   <p class="cover-author">${config.author}</p>
   ${config.description ? `<p class="cover-description">${config.description}</p>` : ''}
+</div>
+
+<div class="page-break"></div>
+`;
+  }
+
+  /**
+   * Generates HTML for the copyright page.
+   * @param config
+   * @returns string
+   */
+  public generateCopyrightPage(config: BookConfig): string {
+    const title = config.title;
+    const author = config.author;
+    const lang = config.language;
+
+    const pageTitle = Locale.get('copyrightPageTitle', lang);
+    const publisherLabel = Locale.get('copyrightPublisherLabel', lang);
+    const publishedLabel = Locale.get('copyrightPublishedLabel', lang);
+    const isbnLabel = Locale.get('copyrightIsbnLabel', lang);
+    const noticeText = Locale.get('copyrightNoticeText', lang);
+
+    const year = new Date().getFullYear();
+    const copyrightStatement = config.copyright || `© ${year} ${author}. ${noticeText}`;
+
+    let publisherBlock = '';
+    if (config.publisher) {
+      publisherBlock = `<p class="copyright-publisher"><strong>${publisherLabel}:</strong> ${config.publisher}</p>`;
+    }
+
+    let publishedBlock = '';
+    if (config.publishDate) {
+      publishedBlock = `<p class="copyright-date"><strong>${publishedLabel}:</strong> ${config.publishDate}</p>`;
+    }
+
+    let isbnBlock = '';
+    if (config.isbn) {
+      isbnBlock = `<p class="copyright-isbn"><strong>${isbnLabel}:</strong> ${config.isbn}</p>`;
+    }
+
+    return `
+<div class="copyright-page">
+  <div class="copyright-header">
+    <h2 class="copyright-page-title">${pageTitle}</h2>
+    <p class="copyright-book-title">${title}</p>
+    ${config.subtitle ? `<p class="copyright-book-subtitle">${config.subtitle}</p>` : ''}
+    <p class="copyright-book-author">${author}</p>
+  </div>
+  
+  <div class="copyright-details">
+    <p class="copyright-statement">${copyrightStatement}</p>
+    ${publisherBlock}
+    ${publishedBlock}
+    ${isbnBlock}
+  </div>
 </div>
 
 <div class="page-break"></div>
@@ -320,6 +376,56 @@ export class StyleManager {
     color: #1a252f;
     text-decoration: underline;
   }
+
+  @page copyright-page-layout {
+    @bottom-center {
+      content: none;
+    }
+  }
+  
+  .copyright-page {
+    page: copyright-page-layout;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 10pt;
+    color: #7f8c8d;
+    text-align: left;
+    max-width: 14cm;
+    margin: 5cm auto 0 auto;
+    line-height: 1.6;
+    box-sizing: border-box;
+    page-break-before: always;
+    break-before: page;
+  }
+  .copyright-page-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 14pt;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 1cm;
+    color: #2c3e50;
+    border-bottom: none !important;
+    padding-bottom: 0;
+    text-align: left;
+  }
+  .copyright-book-title {
+    font-weight: 700;
+    margin-bottom: 0.1cm;
+  }
+  .copyright-book-subtitle {
+    font-style: italic;
+    margin-bottom: 0.2cm;
+  }
+  .copyright-book-author {
+    margin-bottom: 1cm;
+  }
+  .copyright-details {
+    font-size: 9.5pt;
+    border-top: 1px solid #bdc3c7;
+    padding-top: 0.5cm;
+  }
+  .copyright-statement {
+    margin-bottom: 0.5cm;
+  }
 `;
   }
 
@@ -550,6 +656,56 @@ export class StyleManager {
   .toc-chapters li a:hover {
     color: #0f172a;
     text-decoration: underline;
+  }
+
+  @page copyright-page-layout {
+    @bottom-center {
+      content: none;
+    }
+  }
+  
+  .copyright-page {
+    page: copyright-page-layout;
+    font-family: 'Outfit', sans-serif;
+    font-size: 10pt;
+    color: #64748b;
+    text-align: left;
+    max-width: 14cm;
+    margin: 5cm auto 0 auto;
+    line-height: 1.6;
+    box-sizing: border-box;
+    page-break-before: always;
+    break-before: page;
+  }
+  .copyright-page-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 14pt;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 1cm;
+    color: #0f172a;
+    border-bottom: none !important;
+    padding-bottom: 0;
+    text-align: left;
+  }
+  .copyright-book-title {
+    font-weight: 700;
+    margin-bottom: 0.1cm;
+  }
+  .copyright-book-subtitle {
+    font-style: italic;
+    margin-bottom: 0.2cm;
+  }
+  .copyright-book-author {
+    margin-bottom: 1cm;
+  }
+  .copyright-details {
+    font-size: 9.5pt;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 0.5cm;
+  }
+  .copyright-statement {
+    margin-bottom: 0.5cm;
   }
 `;
   }
@@ -785,6 +941,56 @@ export class StyleManager {
   
   .toc-chapters li a:hover {
     text-decoration: underline;
+  }
+
+  @page copyright-page-layout {
+    @bottom-center {
+      content: none;
+    }
+  }
+  
+  .copyright-page {
+    page: copyright-page-layout;
+    font-family: 'EB Garamond', serif;
+    font-size: 11pt;
+    color: #000000;
+    text-align: left;
+    max-width: 14cm;
+    margin: 5cm auto 0 auto;
+    line-height: 1.6;
+    box-sizing: border-box;
+    page-break-before: always;
+    break-before: page;
+  }
+  .copyright-page-title {
+    font-family: 'EB Garamond', serif;
+    font-size: 14pt;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 1cm;
+    color: #000000;
+    border-bottom: none !important;
+    padding-bottom: 0;
+    text-align: left;
+  }
+  .copyright-book-title {
+    font-weight: 700;
+    margin-bottom: 0.1cm;
+  }
+  .copyright-book-subtitle {
+    font-style: italic;
+    margin-bottom: 0.2cm;
+  }
+  .copyright-book-author {
+    margin-bottom: 1cm;
+  }
+  .copyright-details {
+    font-size: 10.5pt;
+    border-top: 1px solid #000000;
+    padding-top: 0.5cm;
+  }
+  .copyright-statement {
+    margin-bottom: 0.5cm;
   }
 `;
   }

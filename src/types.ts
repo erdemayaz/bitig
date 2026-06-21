@@ -29,6 +29,10 @@ export interface BookConfigData {
   language?: string;
   citations?: CitationRule[];
   synopses?: Record<string, string>;
+  isbn?: string;
+  publisher?: string;
+  publishDate?: string;
+  copyright?: string;
 }
 
 export interface SpecialFiles {

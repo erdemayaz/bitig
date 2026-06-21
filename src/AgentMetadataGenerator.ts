@@ -24,6 +24,10 @@ export interface BookMetadata {
     author: string;
     description: string;
     theme: string;
+    isbn?: string;
+    publisher?: string;
+    publishDate?: string;
+    copyright?: string;
   };
   stats: {
     totalSections: number;
@@ -108,7 +112,11 @@ export class AgentMetadataGenerator {
         subtitle: this.bookConfig.subtitle,
         author: this.bookConfig.author,
         description: this.bookConfig.description,
-        theme: this.bookConfig.theme
+        theme: this.bookConfig.theme,
+        isbn: this.bookConfig.isbn,
+        publisher: this.bookConfig.publisher,
+        publishDate: this.bookConfig.publishDate,
+        copyright: this.bookConfig.copyright
       },
       stats: {
         totalSections: this.sections.length,
@@ -141,6 +149,10 @@ title: "${this.bookConfig.title.replace(/"/g, '\\"')}"
 subtitle: "${this.bookConfig.subtitle.replace(/"/g, '\\"')}"
 author: "${this.bookConfig.author.replace(/"/g, '\\"')}"
 description: "${this.bookConfig.description.replace(/"/g, '\\"')}"
+isbn: "${this.bookConfig.isbn}"
+publisher: "${this.bookConfig.publisher.replace(/"/g, '\\"')}"
+publishDate: "${this.bookConfig.publishDate.replace(/"/g, '\\"')}"
+copyright: "${this.bookConfig.copyright.replace(/"/g, '\\"')}"
 compiledAt: "${new Date().toISOString()}"
 aiAgentGuide: "This is a structured markdown book. Headings are shifted to nest correctly. Below is the section and chapter mapping."
 sections:

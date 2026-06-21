@@ -16,6 +16,10 @@ export class BookConfig {
   public pdf: boolean;
   public language: string;
   public citations: CitationRule[];
+  public isbn: string;
+  public publisher: string;
+  public publishDate: string;
+  public copyright: string;
   public rawConfig: BookConfigData;
 
   constructor(configData: Partial<BookConfigData> = {}) {
@@ -32,6 +36,10 @@ export class BookConfig {
     this.pdf = configData.pdf !== false; // defaults to true
     this.language = configData.language || 'tr';
     this.citations = configData.citations || [];
+    this.isbn = configData.isbn || '';
+    this.publisher = configData.publisher || '';
+    this.publishDate = configData.publishDate || '';
+    this.copyright = configData.copyright || '';
 
     this.rawConfig = {
       title: this.title,
@@ -47,6 +55,10 @@ export class BookConfig {
       pdf: this.pdf,
       language: this.language,
       citations: this.citations,
+      isbn: this.isbn,
+      publisher: this.publisher,
+      publishDate: this.publishDate,
+      copyright: this.copyright,
       ...configData
     };
   }
@@ -105,6 +117,18 @@ export class BookConfig {
     }
     if (this.language && typeof this.language !== 'string') {
       throw new Error('Config Error: "language" must be a valid string.');
+    }
+    if (this.isbn && typeof this.isbn !== 'string') {
+      throw new Error('Config Error: "isbn" must be a valid string.');
+    }
+    if (this.publisher && typeof this.publisher !== 'string') {
+      throw new Error('Config Error: "publisher" must be a valid string.');
+    }
+    if (this.publishDate && typeof this.publishDate !== 'string') {
+      throw new Error('Config Error: "publishDate" must be a valid string.');
+    }
+    if (this.copyright && typeof this.copyright !== 'string') {
+      throw new Error('Config Error: "copyright" must be a valid string.');
     }
     return true;
   }

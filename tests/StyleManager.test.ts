@@ -86,4 +86,52 @@ describe('StyleManager', () => {
     expect(html).not.toContain('cover-subtitle');
     expect(html).not.toContain('cover-description');
   });
+
+  describe('generateCopyrightPage', () => {
+    it('should generate copyright page HTML with standard default notice', () => {
+      const config = new BookConfig({
+        title: 'Quantum Physics',
+        author: 'Einstein',
+        language: 'en'
+      });
+
+      const html = manager.generateCopyrightPage(config);
+      expect(html).toContain('COPYRIGHT');
+      expect(html).toContain('Quantum Physics');
+      expect(html).toContain('Einstein');
+      expect(html).toContain('All rights reserved. No part of this publication');
+    });
+
+    it('should generate copyright page HTML in Turkish when configured', () => {
+      const config = new BookConfig({
+        title: 'Kuantum Teorisi',
+        author: 'Erdem Ayaz',
+        language: 'tr'
+      });
+
+      const html = manager.generateCopyrightPage(config);
+      expect(html).toContain('TELİF HAKKI');
+      expect(html).toContain('Tüm hakları saklıdır. Bu yayının hiçbir bölümü');
+    });
+
+    it('should include publisher, publish date, isbn, and custom copyright statement if configured', () => {
+      const config = new BookConfig({
+        title: 'Bitig Manual',
+        author: 'Developer',
+        isbn: '978-3-16-148410-0',
+        publisher: 'Antigravity Press',
+        publishDate: '2026-06-21',
+        copyright: 'Creative Commons Zero v1.0 Universal',
+        language: 'en'
+      });
+
+      const html = manager.generateCopyrightPage(config);
+      expect(html).toContain('Bitig Manual');
+      expect(html).toContain('Developer');
+      expect(html).toContain('Creative Commons Zero v1.0 Universal');
+      expect(html).toContain('Publisher:</strong> Antigravity Press');
+      expect(html).toContain('Published:</strong> 2026-06-21');
+      expect(html).toContain('ISBN:</strong> 978-3-16-148410-0');
+    });
+  });
 });

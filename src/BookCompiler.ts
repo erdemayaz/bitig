@@ -166,6 +166,33 @@ export class BookCompiler {
     const styleBlock = this.styleManager.getStyleBlock();
     const coverHtml = this.styleManager.generateCoverPage(this.config);
 
+    let copyrightHtml = '';
+    const hasCopyrightInfo =
+      this.config.isbn || this.config.publisher || this.config.publishDate || this.config.copyright;
+    if (hasCopyrightInfo) {
+      copyrightHtml = this.styleManager.generateCopyrightPage(this.config);
+    }
+
+    let metaTags = '';
+    if (this.config.author) {
+      metaTags += `  <meta name="author" content="${this.config.author}">\n`;
+    }
+    if (this.config.description) {
+      metaTags += `  <meta name="description" content="${this.config.description}">\n`;
+    }
+    if (this.config.isbn) {
+      metaTags += `  <meta name="dcterms.identifier" content="urn:isbn:${this.config.isbn}">\n`;
+    }
+    if (this.config.publisher) {
+      metaTags += `  <meta name="dcterms.publisher" content="${this.config.publisher}">\n`;
+    }
+    if (this.config.publishDate) {
+      metaTags += `  <meta name="dcterms.date" content="${this.config.publishDate}">\n`;
+    }
+    if (this.config.copyright) {
+      metaTags += `  <meta name="dcterms.rights" content="${this.config.copyright}">\n`;
+    }
+
     // Parse markdown body to HTML using marked (marked.parse returns string synchronously)
     const bodyHtml = marked.parse(markdownContent) as string;
 
@@ -174,10 +201,11 @@ export class BookCompiler {
 <head>
   <meta charset="UTF-8">
   <title>${this.config.title}</title>
-  ${styleBlock}
+${metaTags}  ${styleBlock}
 </head>
 <body>
   ${coverHtml}
+  ${copyrightHtml}
   ${tocHtml}
   <div class="book-body">
     ${bodyHtml}
