@@ -358,6 +358,9 @@ Commands:
   delete:chapter <sec>.<chap>    Deletes a chapter markdown file.
   stats                          Prints progress analytics, word counts, and structure breakdown.
   check                          Runs static diagnostics for broken links, syntax, and citation usage.
+  analyze:init                   Initializes a quality guidelines schema (quality-guidelines.json).
+  analyze:context <sec>.<chap>   Generates the diagnostic context block (manuscript + guidelines) for AI.
+  analyze:report <sec>.<chap>    Formats and records the AI agent's JSON evaluation as a diagnostic report.
   context <sec>.<chap>           Generates a focused RAG/prompt package containing outlines and synopsis.
   learn <scope> [options]        Updates the persistent AI agent memory and feedback log.
   search <query>                 Searches the entire book for keywords or phrases.
@@ -405,6 +408,9 @@ Memory / Learning Options:
   --style "<text>"               Add styling instruction to specified scope.
   --routine "<text>"             Add workflow routine/rule to specified scope.
   --clear                        Clear memory for specified scope.
+
+Diagnostics / Quality Scoring Options:
+  --file <path>                  Path to the temporary AI diagnostics JSON file for analyze:report.
 
 Configuration Details:
   For a comprehensive reference on book.json structural and styling parameters (themes, custom fonts, page sizes, margins, colors, etc.), run:
@@ -991,12 +997,15 @@ Welcome to Bitig! This guide details the workflow steps to write, refine, and co
    This generates a prompt pack containing outlines, synopses, preceding chapter content, visual theme guidelines, and injected memory layers.
 
    🤖 THE AI-FIRST AUTONOMOUS LOOP:
-   AI agents can execute a complete autonomous cycle to write, verify, and summarize content:
-     1. bitig context 2.3  --> Retrieve prompt pack (including memory logs)
-     2. Write/edit manuscript chapter file (assets/section-2/2.3.md)
-     3. bitig capture --coords 2.3 (or --epub-chapter 2.3) --> Visual validation
-     4. bitig learn 2.3 --feedback "feedback" --> Feed style/routine/feedback back into memory
-     5. bitig update:metadata 2.3 --synopsis "..." --> AI feedback loop to update index
+    AI agents can execute a complete autonomous cycle to write, verify, and score content quality:
+      1. bitig context 2.3  --> Retrieve prompt pack (including memory logs)
+      2. Write/edit manuscript chapter file (assets/section-2/2.3.md)
+      3. bitig capture --coords 2.3 (or --epub-chapter 2.3) --> Visual validation
+      4. bitig analyze:context 2.3 --> Package chapter content + quality guidelines for AI evaluation
+      5. [AI Agent evaluates/scores chapter based on guidelines, outputting a temp JSON file]
+      6. bitig analyze:report 2.3 --file temp_diagnostic.json --> Render ASCII report table and save log
+      7. bitig learn 2.3 --feedback "feedback" --> Feed style/routine/feedback back into memory
+      8. bitig update:metadata 2.3 --synopsis "..." --> AI feedback loop to update index
 
 4. AI AGENT LEARNING & MEMORY
    AI agents learn from feedback and styling decisions, persisting logs inside memory.json:
@@ -1031,6 +1040,15 @@ Welcome to Bitig! This guide details the workflow steps to write, refine, and co
 9. VISUAL SCREENSHOT CAPTURE
    Capture PNG screenshots of PDF pages or specific HTML sections/chapters:
      bitig capture [--page <number>] [--range <start>-<end>] [--coords <coords>] [--selector <selector>] [--output-dir <dir>]
+
+10. SEMANTIC DIAGNOSTICS & QUALITY SCORING
+   Facilitate AI-driven quality and consistency evaluations based on customizable rubrics:
+     - bitig analyze:init
+       Initializes a template 'quality-guidelines.json' with configurable scoring criteria and weights.
+     - bitig analyze:context <secNum>.<chapNum>
+       Combines the target chapter manuscript with the quality guidelines into a single package.
+     - bitig analyze:report <secNum>.<chapNum> --file <tempJsonPath>
+       Renders a zero-dependency ASCII table scoring report from an AI evaluation JSON output, and logs the report permanently under 'diagnostics/'.
 
 For detailed command options, run:
   bitig --help

@@ -34,13 +34,13 @@ This document outlines the planned feature roadmap for the **Bitig** book compil
   - Support responsive visual container styles in predefined stylesheets.
   - _Prerequisite for advanced cover layout designs._
 
-### 4. Semantic Diagnostics & Quality Scoring Guide
+### [COMPLETED] 4. Semantic Diagnostics & Quality Scoring Guide
 
 - **Objective**: Introduce a framework to analyze manuscript quality (e.g. style consistency, narrative flow, interdisciplinarity, rationality) using AI evaluations.
 - **Details**:
-  - Add a scoring guideline schema (`quality-guidelines.json`) where editors can define rubrics and style guides.
-  - Implement an AI-powered diagnostic command (`bitig analyze [coords]`) that scores sections or chapters out of 100 based on the custom scoring guidelines.
-  - Report diagnostics in a structured tabular format in CLI stdout and log files.
+  - Add a scoring guideline schema (`quality-guidelines.json`) where editors can define rubrics and style guides (implemented via `bitig analyze:init`).
+  - Implement CLI helper utilities to package evaluations context (`bitig analyze:context`) and report diagnostic evaluations (`bitig analyze:report --file <file>`) back to the CLI.
+  - Reports are formatted in a clean zero-dependency ASCII table directly in stdout and logged to local files under `diagnostics/`.
 
 ### [COMPLETED] 5. AI Agent Thought Logging & Learning History
 
