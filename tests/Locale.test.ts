@@ -23,11 +23,13 @@ describe('Locale', () => {
   });
 
   it('should fallback to English for non-supported languages', () => {
-    expect(Locale.get('tocHtmlHeading', 'fr')).toBe('TABLE OF CONTENTS');
+    expect(Locale.get('tocHtmlHeading', 'it')).toBe('TABLE OF CONTENTS');
   });
 
-  it('should retrieve correct translations for German', () => {
+  it('should retrieve correct translations for German, Spanish and French', () => {
     expect(Locale.get('tocHtmlHeading', 'de')).toBe('INHALTSVERZEICHNIS');
+    expect(Locale.get('tocHtmlHeading', 'es')).toBe('ÍNDICE DE CONTENIDOS');
+    expect(Locale.get('tocHtmlHeading', 'fr')).toBe('TABLE DES MATIÈRES');
   });
 
   it('should correctly perform token replacements', () => {
