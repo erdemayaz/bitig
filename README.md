@@ -1,5 +1,11 @@
 # Bitig - OOP Book Compiler and Writing Workflow CLI
 
+![TypeScript](https://img.shields.io/badge/TypeScript-%23007ACC.svg?logo=typescript&logoColor=white)
+![NPM Version](https://img.shields.io/npm/v/@erdemayaz/bitig.svg)
+![License](https://img.shields.io/npm/l/@erdemayaz/bitig.svg)
+![Coverage](https://img.shields.io/badge/coverage-97%25-brightgreen)
+![Code Style](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)
+
 Bitig is a structured, type-safe TypeScript command-line tool designed for authors and AI agents to outline, write, analyze, lint, and compile manuscripts into high-quality publications (Markdown, HTML, PDF, and AI-readable metadata).
 
 📍 **[Project Roadmap](roadmap.md)** — View our active roadmap and upcoming features.
