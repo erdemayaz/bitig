@@ -231,6 +231,60 @@ export class CaptureManager {
     // Render chapter XHTML string (no disk I/O for the EPUB itself)
     const xhtmlContent = epubCompiler.renderChapterXhtml(sectionNum, chapterNum);
 
+    // Resolve resource directory (check both src/resources and dist/resources)
+    const possiblePaths = [
+      path.join(__dirname, 'resources'),
+      path.join(__dirname, '../src/resources'),
+      path.join(__dirname, '../resources')
+    ];
+    let resourceDir = '';
+    for (const p of possiblePaths) {
+      if (fs.existsSync(p)) {
+        resourceDir = p;
+        break;
+      }
+    }
+
+    let processedXhtml = xhtmlContent;
+
+    // Inline book.css (since the CSS contains fonts and layout styles)
+    const bookCss = compiler.styleManager.getEpubCSS();
+    processedXhtml = processedXhtml.replace(
+      /<link[^>]*href="[^"]*book\.css"[^>]*\/?>/gi,
+      () => `<style type="text/css">${bookCss}</style>`
+    );
+
+    // Inline KaTeX CSS and JS if local resources exist
+    if (resourceDir) {
+      const katexCssPath = path.join(resourceDir, 'katex.min.css');
+      const katexJsPath = path.join(resourceDir, 'katex.min.js');
+      const autoRenderJsPath = path.join(resourceDir, 'auto-render.min.js');
+
+      if (
+        fs.existsSync(katexCssPath) &&
+        fs.existsSync(katexJsPath) &&
+        fs.existsSync(autoRenderJsPath)
+      ) {
+        const katexCss = fs.readFileSync(katexCssPath, 'utf8');
+        const katexJs = fs.readFileSync(katexJsPath, 'utf8');
+        const autoRenderJs = fs.readFileSync(autoRenderJsPath, 'utf8');
+
+        processedXhtml = processedXhtml
+          .replace(
+            /<link[^>]*href="[^"]*katex\.min\.css"[^>]*\/?>/gi,
+            () => `<style type="text/css">${katexCss}</style>`
+          )
+          .replace(
+            /<script[^>]*src="[^"]*katex\.min\.js"[^>]*><\/script>/gi,
+            () => `<script type="text/javascript">${katexJs}</script>`
+          )
+          .replace(
+            /<script[^>]*src="[^"]*auto-render\.min\.js"[^>]*><\/script>/gi,
+            () => `<script type="text/javascript">${autoRenderJs}</script>`
+          );
+      }
+    }
+
     if (!fs.existsSync(outputDir)) {
       fs.mkdirSync(outputDir, { recursive: true });
     }
@@ -242,7 +296,7 @@ export class CaptureManager {
         args: ['--no-sandbox', '--disable-setuid-sandbox']
       });
       const page = await browser.newPage();
-      await page.setContent(xhtmlContent, { waitUntil: 'networkidle0' });
+      await page.setContent(processedXhtml, { waitUntil: 'networkidle0' });
 
       const destPath = path.join(outputDir, `epub-chapter-${coords.replace('.', '-')}.png`);
       await page.screenshot({ path: destPath, fullPage: true });

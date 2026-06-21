@@ -288,4 +288,40 @@ describe('CaptureManager', () => {
       'Failed to capture screenshot:'
     );
   });
+
+  it('should capture an EPUB chapter with inlined assets', async () => {
+    const mockElement = {
+      screenshot: jest.fn().mockImplementation((opts: any) => {
+        if (opts && opts.path) {
+          fs.writeFileSync(opts.path, 'png data');
+        }
+        return Promise.resolve(Buffer.from('png data'));
+      })
+    };
+
+    const { mockBrowser, mockPage } = setupMockPuppeteer(mockElement, {
+      screenshot: mockElement.screenshot
+    });
+
+    // Create manuscript chapters to compile
+    const assetsDir = path.join(config.assetsDir, 'section-1');
+    fs.mkdirSync(assetsDir, { recursive: true });
+    fs.writeFileSync(path.join(assetsDir, '1.1.md'), '# Title\n\nChapter body content', 'utf8');
+
+    const manager = new CaptureManager(config, configPath);
+    await manager.captureEpubChapter('1.1', path.join(config.distDir, 'screenshots'));
+
+    expect(mockPage.setContent).toHaveBeenCalledWith(
+      expect.stringContaining('Title'),
+      expect.objectContaining({ waitUntil: 'networkidle0' })
+    );
+    expect(mockPage.setContent).toHaveBeenCalledWith(
+      expect.stringContaining('style'),
+      expect.any(Object)
+    );
+    expect(mockBrowser.close).toHaveBeenCalled();
+
+    const expectedScreenshot = path.join(config.distDir, 'screenshots', 'epub-chapter-1-1.png');
+    expect(fs.existsSync(expectedScreenshot)).toBe(true);
+  });
 });
