@@ -40,6 +40,8 @@ bitig build [options]
 Generates outputs inside the `dist/` directory.
 
 - `--no-pdf`: Compiles Markdown, HTML, and AI metadata but skips Puppeteer PDF rendering.
+- `--epub`: Enables EPUB 3 compilation (opt-in; disabled by default). Overrides `epub: false` in `book.json`.
+- `--no-epub`: Disables EPUB compilation even if `epub: true` is set in `book.json`.
 - `-t, --theme <serif|sans-serif|academic>`: Overrides the visual stylesheet.
 - `-c, --config <path>`: Points to a custom configuration JSON (defaults to `./book.json`).
 
@@ -107,12 +109,13 @@ Produces a focused context window prompt pack for LLM/RAG writers to edit or con
 bitig capture [options]
 ```
 
-Generates PNG screenshots of compiled PDF pages or specific HTML sections/chapters for layout verification (useful for visual regression checks by AI agents).
+Generates PNG screenshots of compiled PDF pages, specific HTML sections/chapters, or EPUB chapter renders for layout verification (useful for visual regression checks by AI agents).
 
 - `--page <number>`: Capture a specific page of the PDF (default: 1).
 - `--range <start>-<end>`: Capture a range of pages (e.g. `1-3`).
 - `--coords <coords>`: Capture a specific chapter by section/chapter coordinates from the HTML (e.g. `1.1`).
 - `--selector <selector>`: Capture a specific HTML element using CSS selector (e.g. `".cover-page"`).
+- `--epub-chapter <coords>`: Render and screenshot a specific EPUB chapter by coordinates (e.g. `1.1`). No `.epub` file is required — XHTML is generated on-the-fly.
 - `--output-dir <dir>`: Custom folder to save screenshots (defaults to `dist/screenshots`).
 
 ### 8. Workflow Guide
@@ -159,6 +162,7 @@ When writing or editing using Bitig, follow this recommended workflow loop:
 - **`epilogueFile`** (Optional - `string`): Name of the epilogue file under `assetsDir` (default: `"epilogue.md"`). Treated as Section 998.
 - **`bibliographyFile`** (Optional - `string`): Name of the bibliography file under `assetsDir` (default: `"bibliography.md"`). Treated as Section 999.
 - **`pdf`** (Optional - `boolean`): Enables/disables PDF compilation via Puppeteer (default: `true`).
+- **`epub`** (Optional - `boolean`): Enables/disables EPUB 3 compilation (default: `false`, opt-in). Set to `true` to generate a `.epub` file alongside the PDF. Can also be enabled with the `--epub` CLI flag without modifying `book.json`.
 - **`language`** (Optional - `string`): Locale code of the book (default: `"tr"`, supported: `"tr"`, `"en"`, `"de"`, `"es"`, `"fr"`). Determines TOC headings and template localizations.
 - **`sectionTitles`** (Optional - `Record<string, string>`): Map of section folder numbers (e.g. `"1"`) to section header titles.
 - **`citations`** (Optional - `Array<{ term: string, replacement: string }>`): Auto-replacement rules for inserting reference citations (e.g., term matching to HTML footnotes).

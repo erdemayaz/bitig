@@ -26,6 +26,7 @@ export interface BookConfigData {
   epilogueFile?: string;
   bibliographyFile?: string;
   pdf?: boolean;
+  epub?: boolean;
   language?: string;
   citations?: CitationRule[];
   synopses?: Record<string, string>;
@@ -47,4 +48,5 @@ export interface CaptureOptions {
   coords?: string;
   selector?: string;
   outputDir?: string;
+  epubChapter?: string; // EPUB chapter capture: "sectionNum.chapterNum" format (e.g. "1.1")
 }

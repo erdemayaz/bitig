@@ -35,11 +35,13 @@
   "author": "Erdem Ayaz",
   "license": "MIT",
   "dependencies": {
+    "jszip": "^3.10.1",
     "marked": "^12.0.1",
     "puppeteer": "^22.11.0"
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",
+    "@types/jszip": "^3.4.0",
     "@types/node": "^20.11.0",
     "husky": "^9.1.7",
     "jest": "^30.4.2",

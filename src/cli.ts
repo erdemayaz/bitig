@@ -20,6 +20,7 @@ interface CliArgs {
   output?: string;
   dist?: string;
   pdf?: boolean;
+  epub?: boolean;
   help?: boolean;
   positionals: string[];
   title?: string;
@@ -31,6 +32,7 @@ interface CliArgs {
   coords?: string;
   selector?: string;
   outputDir?: string;
+  epubChapter?: string;
 }
 
 const args = process.argv.slice(2);
@@ -191,6 +193,17 @@ function parseArgs(args: string[]): CliArgs {
       result.pdf = false;
     } else if (arg === '--pdf') {
       result.pdf = true;
+    } else if (arg === '--epub') {
+      result.epub = true;
+    } else if (arg === '--no-epub') {
+      result.epub = false;
+    } else if (arg === '--epub-chapter') {
+      if (i + 1 < args.length) {
+        result.epubChapter = args[++i];
+      } else {
+        console.error('Error: Option --epub-chapter requires a value (e.g. 1.1).');
+        process.exit(1);
+      }
     } else if (arg === '--page') {
       if (i + 1 < args.length) {
         const pageVal = parseInt(args[++i], 10);
@@ -276,6 +289,8 @@ Build Options:
   -d, --dist <dir>               Override the output distribution directory.
   --pdf                          Enable PDF compilation (default).
   --no-pdf                       Disable PDF compilation.
+  --epub                         Enable EPUB 3 compilation (opt-in, disabled by default).
+  --no-epub                      Disable EPUB compilation (overrides book.json).
 
 Dev Options:
   -p, --port <number>            Port for the local development preview server (default: 3000).
@@ -285,6 +300,7 @@ Capture Options:
   --range <start>-<end>          Range of pages to capture (e.g. 1-3).
   --coords <coords>              Section/Chapter coordinates to capture from HTML (e.g. 1.1).
   --selector <selector>          CSS selector of the element to capture from HTML (e.g. ".cover-page").
+  --epub-chapter <coords>        Render and screenshot a specific EPUB chapter (e.g. 1.1).
   --output-dir <dir>             Directory where screenshots will be saved (default: dist/screenshots).
 
 Add Options:
@@ -426,6 +442,9 @@ async function handleBuild(cliArgs: CliArgs): Promise<void> {
     }
     if (cliArgs.pdf !== undefined) {
       config.pdf = cliArgs.pdf;
+    }
+    if (cliArgs.epub !== undefined) {
+      config.epub = cliArgs.epub;
     }
 
     const compiler = new BookCompiler(config);
@@ -977,13 +996,20 @@ async function handleCapture(cliArgs: CliArgs): Promise<void> {
     config = loadConfig(cliArgs.config);
     const configPath = getConfigPath(cliArgs.config);
     const captureManager = new CaptureManager(config, configPath);
-    await captureManager.capture({
-      page: cliArgs.page,
-      range: cliArgs.range,
-      coords: cliArgs.coords,
-      selector: cliArgs.selector,
-      outputDir: cliArgs.outputDir
-    });
+
+    // EPUB chapter capture is a distinct code path
+    if (cliArgs.epubChapter) {
+      const outputDir = cliArgs.outputDir || path.join(config.distDir, 'screenshots');
+      await captureManager.captureEpubChapter(cliArgs.epubChapter, outputDir);
+    } else {
+      await captureManager.capture({
+        page: cliArgs.page,
+        range: cliArgs.range,
+        coords: cliArgs.coords,
+        selector: cliArgs.selector,
+        outputDir: cliArgs.outputDir
+      });
+    }
   } catch (error) {
     const err = error as Error;
     console.error(`Error: Visual capture failed: ${err.message}`);

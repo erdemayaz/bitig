@@ -44,6 +44,8 @@ export class Locale {
       buildSuccess: 'Kitap ve yapay zeka metaverileri başarıyla derlendi!',
       buildPdfSkip: 'PDF üretimi atlandı (yapılandırmada devre dışı bırakıldı).',
       buildGeneratingPdf: 'PDF çıktısı üretiliyor: {path}...',
+      buildGeneratingEpub: 'EPUB çıktısı üretiliyor: {path}...',
+      buildEpubSkip: 'EPUB üretimi atlandı (yapılandırmada devre dışı bırakıldı).',
 
       // CLI Management
       managerSectionCreated:
@@ -62,6 +64,7 @@ export class Locale {
       captureSaved: 'Ekran görüntüsü şuraya kaydedildi: {path}',
       captureFailed: 'Ekran görüntüsü alınamadı: {error}',
       captureInvalidPage: 'Geçersiz sayfa numarası: {page}',
+      captureEpubChapter: 'EPUB bölümü yakalanıyor: {coords}...',
       managerChapterTemplate:
         '# {title}\n\nBu bölüm {sectionNum}.{chapterNum} başlığı "{title}". İçeriği buraya yazın.\n',
       initSuccessJson: 'book.json oluşturuldu.',
@@ -165,6 +168,8 @@ export class Locale {
       buildSuccess: 'Book and AI metadata successfully compiled!',
       buildPdfSkip: 'PDF generation skipped (disabled in configuration).',
       buildGeneratingPdf: 'Generating PDF output: {path}...',
+      buildGeneratingEpub: 'Generating EPUB output: {path}...',
+      buildEpubSkip: 'EPUB generation skipped (disabled in configuration).',
 
       // CLI Management
       managerSectionCreated:
@@ -182,6 +187,7 @@ export class Locale {
       captureSaved: 'Screenshot saved to: {path}',
       captureFailed: 'Failed to capture screenshot: {error}',
       captureInvalidPage: 'Invalid page number: {page}',
+      captureEpubChapter: 'Capturing EPUB chapter: {coords}...',
       managerChapterTemplate:
         '# {title}\n\nThis is chapter {sectionNum}.{chapterNum} titled "{title}". Fill in the content.\n',
       initSuccessJson: 'book.json created.',
@@ -285,6 +291,8 @@ export class Locale {
       buildSuccess: 'Buch und KI-Metadaten erfolgreich kompiliert!',
       buildPdfSkip: 'PDF-Erstellung übersprungen (in der Konfiguration deaktiviert).',
       buildGeneratingPdf: 'PDF-Ausgabe wird generiert: {path}...',
+      buildGeneratingEpub: 'EPUB-Ausgabe wird generiert: {path}...',
+      buildEpubSkip: 'EPUB-Erstellung übersprungen (in der Konfiguration deaktiviert).',
 
       // CLI Management
       managerSectionCreated:
@@ -303,6 +311,7 @@ export class Locale {
       captureSaved: 'Screenshot gespeichert unter: {path}',
       captureFailed: 'Fehler beim Erstellen des Screenshots: {error}',
       captureInvalidPage: 'Ungültige Seitennummer: {page}',
+      captureEpubChapter: 'EPUB-Kapitel wird erfasst: {coords}...',
       managerChapterTemplate:
         '# {title}\n\nDies ist Kapitel {sectionNum}.{chapterNum} mit dem Titel "{title}". Fügen Sie hier den Inhalt ein.\n',
       initSuccessJson: 'book.json erstellt.',
@@ -414,6 +423,8 @@ export class Locale {
       buildSuccess: '¡Libro y metadatos de IA compilados con éxito!',
       buildPdfSkip: 'Generación de PDF omitida (deshabilitada en la configuración).',
       buildGeneratingPdf: 'Generando salida PDF: {path}...',
+      buildGeneratingEpub: 'Generando salida EPUB: {path}...',
+      buildEpubSkip: 'Generación de EPUB omitida (deshabilitada en la configuración).',
 
       // CLI Management
       managerSectionCreated:
@@ -432,6 +443,7 @@ export class Locale {
       captureSaved: 'Captura de pantalla guardada en: {path}',
       captureFailed: 'Error al capturar la pantalla: {error}',
       captureInvalidPage: 'Número de página inválido: {page}',
+      captureEpubChapter: 'Capturando capítulo de EPUB: {coords}...',
       managerChapterTemplate:
         '# {title}\n\nEste es el capítulo {sectionNum}.{chapterNum} titulado "{title}". Complete el contenido.\n',
       initSuccessJson: 'book.json creado.',
@@ -536,6 +548,8 @@ export class Locale {
       buildSuccess: "Livre et métadonnées d'IA compilés avec succès!",
       buildPdfSkip: 'Génération du PDF ignorée (désactivée dans la configuration).',
       buildGeneratingPdf: 'Génération du PDF de sortie: {path}...',
+      buildGeneratingEpub: 'Génération de la sortie EPUB: {path}...',
+      buildEpubSkip: 'Génération EPUB ignorée (désactivée dans la configuration).',
 
       // CLI Management
       managerSectionCreated:
@@ -554,6 +568,7 @@ export class Locale {
       captureSaved: "Capture d'écran sauvegardée à l'emplacement: {path}",
       captureFailed: "Échec de la capture d'écran: {error}",
       captureInvalidPage: 'Numéro de page invalide: {page}',
+      captureEpubChapter: 'Capture du chapitre EPUB: {coords}...',
       managerChapterTemplate:
         '# {title}\n\nCeci est le chapitre {sectionNum}.{chapterNum} nommé "{title}". Remplissez le contenu.\n',
       initSuccessJson: 'book.json créé.',

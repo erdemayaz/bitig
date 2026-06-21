@@ -7,6 +7,7 @@ export { TOCGenerator } from './TOCGenerator';
 export { StyleManager } from './StyleManager';
 export { AgentMetadataGenerator } from './AgentMetadataGenerator';
 export { PdfCompiler } from './PdfCompiler';
+export { EpubCompiler } from './EpubCompiler';
 export { BookCompiler } from './BookCompiler';
 export { BookManager } from './BookManager';
 export { BookLinter } from './BookLinter';

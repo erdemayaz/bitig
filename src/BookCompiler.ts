@@ -10,6 +10,7 @@ import { TOCGenerator } from './TOCGenerator';
 import { StyleManager } from './StyleManager';
 import { AgentMetadataGenerator } from './AgentMetadataGenerator';
 import { PdfCompiler } from './PdfCompiler';
+import { EpubCompiler } from './EpubCompiler';
 import { SpecialFiles } from './types';
 import { Locale } from './Locale';
 
@@ -303,6 +304,21 @@ ${metaTags}  ${styleBlock}
       await pdfCompiler.compileToPdf(html, pdfOutputPath);
     } else {
       console.log(Locale.get('buildPdfSkip', this.config.language));
+    }
+
+    // 5. EPUB output (opt-in: epub: true in book.json or --epub CLI flag)
+    if (this.config.epub) {
+      const epubOutputPath = path.join(
+        this.config.distDir,
+        this.config.outputFilename.replace(/\.md$/, '.epub')
+      );
+      const epubCompiler = new EpubCompiler(this.config, this.sections, this.styleManager);
+
+      const epubMsg = Locale.get('buildGeneratingEpub', this.config.language, {
+        path: epubOutputPath
+      });
+      console.log(epubMsg);
+      await epubCompiler.compileToEpub(epubOutputPath);
     }
   }
 

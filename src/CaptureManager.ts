@@ -5,6 +5,7 @@ import { BookConfig } from './BookConfig';
 import { CaptureOptions } from './types';
 import { Locale } from './Locale';
 import { BookCompiler } from './BookCompiler';
+import { EpubCompiler } from './EpubCompiler';
 
 export class CaptureManager {
   private config: BookConfig;
@@ -31,7 +32,9 @@ export class CaptureManager {
     const isPdfCapture =
       options.page !== undefined ||
       options.range !== undefined ||
-      (options.coords === undefined && options.selector === undefined);
+      (options.coords === undefined &&
+        options.selector === undefined &&
+        options.epubChapter === undefined);
 
     // Auto-build if outputs are missing
     if (isPdfCapture && (!fs.existsSync(pdfPath) || !this.config.pdf)) {
@@ -45,7 +48,7 @@ export class CaptureManager {
       } finally {
         this.config.pdf = originalPdf;
       }
-    } else if (!isPdfCapture && !fs.existsSync(htmlPath)) {
+    } else if (!isPdfCapture && !fs.existsSync(htmlPath) && !options.epubChapter) {
       const compiler = new BookCompiler(this.config);
       compiler.scanAndLoad();
       await compiler.writeOutputs();
@@ -192,6 +195,58 @@ export class CaptureManager {
       }
     } catch (err: any) {
       throw new Error(Locale.get('captureFailed', this.config.language, { error: err.message }));
+    } finally {
+      if (browser) {
+        await browser.close();
+      }
+    }
+  }
+
+  /**
+   * Captures a screenshot of a specific EPUB chapter rendered in a headless browser.
+   * The chapter XHTML is generated on-the-fly by EpubCompiler and fed directly to
+   * Puppeteer via setContent() — no disk-based .epub file is required.
+   * @param coords  Chapter coordinates in "sectionNum.chapterNum" format (e.g. "1.2")
+   * @param outputDir  Directory to save the PNG screenshot
+   */
+  public async captureEpubChapter(coords: string, outputDir: string): Promise<void> {
+    const parts = coords.split('.');
+    if (parts.length < 2) {
+      throw new Error(`Invalid EPUB chapter coordinates: "${coords}". Expected format: "1.2"`);
+    }
+    const sectionNum = parseInt(parts[0], 10);
+    const chapterNum = parseInt(parts[1], 10);
+    if (isNaN(sectionNum) || isNaN(chapterNum)) {
+      throw new Error(`Invalid EPUB chapter coordinates: "${coords}". Must be numeric.`);
+    }
+
+    console.log(Locale.get('captureEpubChapter', this.config.language, { coords }));
+
+    // Scan and load book structure to feed EpubCompiler
+    const compiler = new BookCompiler(this.config);
+    compiler.scanAndLoad();
+
+    const epubCompiler = new EpubCompiler(this.config, compiler.sections, compiler.styleManager);
+
+    // Render chapter XHTML string (no disk I/O for the EPUB itself)
+    const xhtmlContent = epubCompiler.renderChapterXhtml(sectionNum, chapterNum);
+
+    if (!fs.existsSync(outputDir)) {
+      fs.mkdirSync(outputDir, { recursive: true });
+    }
+
+    let browser = null;
+    try {
+      browser = await puppeteer.launch({
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+      });
+      const page = await browser.newPage();
+      await page.setContent(xhtmlContent, { waitUntil: 'networkidle0' });
+
+      const destPath = path.join(outputDir, `epub-chapter-${coords.replace('.', '-')}.png`);
+      await page.screenshot({ path: destPath, fullPage: true });
+      console.log(Locale.get('captureSaved', this.config.language, { path: destPath }));
     } finally {
       if (browser) {
         await browser.close();

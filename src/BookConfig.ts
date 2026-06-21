@@ -14,6 +14,7 @@ export class BookConfig {
   public theme: string;
   public customThemePath: string;
   public pdf: boolean;
+  public epub: boolean;
   public language: string;
   public citations: CitationRule[];
   public isbn: string;
@@ -35,6 +36,7 @@ export class BookConfig {
     this.theme = configData.theme || 'serif';
     this.customThemePath = configData.customThemePath || '';
     this.pdf = configData.pdf !== false; // defaults to true
+    this.epub = configData.epub ?? false; // defaults to false (opt-in)
     this.language = configData.language || 'tr';
     this.citations = configData.citations || [];
     this.isbn = configData.isbn || '';
@@ -55,6 +57,7 @@ export class BookConfig {
       theme: this.theme,
       customThemePath: this.customThemePath,
       pdf: this.pdf,
+      epub: this.epub,
       language: this.language,
       citations: this.citations,
       isbn: this.isbn,

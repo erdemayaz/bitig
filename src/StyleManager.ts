@@ -75,6 +75,46 @@ export class StyleManager {
   }
 
   /**
+   * Get a stripped version of the active CSS safe for EPUB readers.
+   * Removes PDF-specific @page rules, page-break properties, orphans/widows,
+   * and print media queries that EPUB readers cannot process.
+   * @returns string
+   */
+  public getEpubCSS(): string {
+    const raw = this.getCSS();
+
+    // Remove @page { ... } blocks (including nested @bottom-center etc.)
+    let stripped = raw.replace(/@page\s*[^{]*\{[^{}]*(\{[^{}]*\}[^{}]*)?\}/g, '');
+
+    // Remove @media print { ... } blocks
+    stripped = stripped.replace(/@media\s+print\s*\{[\s\S]*?\}\s*\}/g, '');
+
+    // Remove individual print-related CSS properties line by line
+    stripped = stripped
+      .split('\n')
+      .filter((line) => {
+        const trimmed = line.trim().toLowerCase();
+        return (
+          !trimmed.startsWith('page-break-before') &&
+          !trimmed.startsWith('page-break-after') &&
+          !trimmed.startsWith('page-break-inside') &&
+          !trimmed.startsWith('break-before') &&
+          !trimmed.startsWith('break-after') &&
+          !trimmed.startsWith('break-inside') &&
+          !trimmed.startsWith('orphans') &&
+          !trimmed.startsWith('widows') &&
+          !trimmed.startsWith('page:') // named page references
+        );
+      })
+      .join('\n');
+
+    // Collapse multiple blank lines from removed blocks
+    stripped = stripped.replace(/\n{3,}/g, '\n\n');
+
+    return stripped.trim();
+  }
+
+  /**
    * Generates HTML for the cover page.
    * @param config
    * @returns string
